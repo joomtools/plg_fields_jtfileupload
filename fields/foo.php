@@ -11,9 +11,10 @@ defined('_JEXEC') or die;
 
 JFormHelper::loadFieldClass('file');
 
+JFormHelper::addRulePath(JPATH_PLUGINS . '/fields/foo/rules');
+//JForm::getInstance()->validate($submitedValues);
+
 class JFormFieldFoo extends JFormFieldFile
 {
-    protected $type = 'Foo';
 
-    protected $accept = '.pdf|.PDF';
 }

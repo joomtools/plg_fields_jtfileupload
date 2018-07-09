@@ -66,6 +66,8 @@ class plgFieldsFoo extends FieldsPlugin
             return $fieldNode;
         }
 
+        $fieldNode->setAttribute('accept', '.pdf,.PDF');
+
         return $fieldNode;
 	}
 
@@ -84,5 +86,29 @@ class plgFieldsFoo extends FieldsPlugin
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
 
+        if (!empty($_FILES))
+        {
+            print_r($_FILES);
+            echo '<p>';
+        //    $jinput          = new \Jtf\Input\Files;
+        //    $submitedFiles     = $jinput->get($formTheme);
+         //   $submitedValues = array_merge_recursive($submitedValues, $submitedFiles);
+        }else{echo '<p>empty</p>';};
+       // $this->getForm()->bind($submitedValues);
+        //$this->setFieldValidates();
+        //$valid = $this->getForm()->validate($submitedValues);
+
+
+print_r($context);
+
+echo "<p>";
+
+print_r($item);
+        echo "<p>";
+
+        print_r($isNew);
+        echo "<p>";
+print_r($data);
+die();
 	}
 }
