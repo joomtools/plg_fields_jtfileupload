@@ -13,7 +13,8 @@ defined('_JEXEC') or die;
 use Joomla\CMS\Application\CMSApplication;
 
 JLoader::import('components.com_fields.libraries.fieldsplugin', JPATH_ADMINISTRATOR);
-
+JFormHelper::addRulePath(JPATH_PLUGINS . '/fields/foo/rules');
+//JForm::getInstance()->validate($submitedValues);
 
 /**
  * Foo plugin.
@@ -88,10 +89,18 @@ class plgFieldsFoo extends FieldsPlugin
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
+        $input = $this->app->input;
+        $files = $input->files;
 
+     print_r($this->params->get('type'));
+     echo '<p>name</p>';
+        //$files->get
         if (!empty($_FILES))
         {
-            print_r($_FILES);
+            //print_r($_FILES);
+
+
+
             echo '<p>';
         //    $jinput          = new \Jtf\Input\Files;
         //    $submitedFiles     = $jinput->get($formTheme);
@@ -112,6 +121,6 @@ print_r($item);
         print_r($isNew);
         echo "<p>";
 print_r($data);
-die();
+//die();
 	}
 }
