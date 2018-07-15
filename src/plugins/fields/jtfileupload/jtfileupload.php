@@ -71,6 +71,12 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onCustomFieldsPrepareDom($field, DOMElement $parent, JForm $form)
 	{
+		// Execute only if we had a jtfileupload
+		if ($field->type == 'jtfileupload')
+		{
+			return parent::onCustomFieldsPrepareDom($field, $parent, $form);
+		}
+
 		// Set Fieldname
 		if ($field->type == 'jtfileupload')
 		{
@@ -112,6 +118,19 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	{
 		// Array with fieldnames uses jtfileupload
 		$fieldname = $this->fieldname;
+
+		if (empty($fieldname))
+		{
+			return true;
+		}
+
+		foreach ($fieldname as $name)
+		{
+			echo '<p>';
+			echo $item['com_fields'][$name];
+			echo '</p>';
+		}
+		
 		$input     = $this->app->input;
 		$files     = $input->files;
 
