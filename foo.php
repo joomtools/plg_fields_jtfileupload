@@ -60,6 +60,9 @@ class plgFieldsFoo extends FieldsPlugin
 	 */
 	public function onCustomFieldsPrepareDom($field, DOMElement $parent, JForm $form)
 	{
+	    $script = "jQuery(document).ready(function(){jQuery('form#adminForm').attr('enctype','multipart/form-data');});";
+        JFactory::getDocument()->addScriptDeclaration($script);
+
         $fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
         if (!$fieldNode)
         {
