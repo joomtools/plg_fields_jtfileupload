@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 
 JFormHelper::loadFieldClass('file');
 
-class JFormFieldFoo extends JFormFieldFile
+class JFormFieldJtfileupload extends JFormFieldFile
 {
 
 }

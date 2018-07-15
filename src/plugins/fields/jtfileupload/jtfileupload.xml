@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" version="3.8" group="fields" method="upgrade">
+	<name>PLG_FIELDS_JTFILEUPLOAD</name>
+	<creationDate>##DATE##</creationDate>
+	<author>Sven Schultschik</author>
+	<authorEmail></authorEmail>
+	<authorUrl></authorUrl>
+	<copyright>(c) ##YEAR## JoomTools.de - All rights reserved.</copyright>
+	<license>GNU General Public License version 3 or later; see LICENSE</license>
+	<version>##VERSION##</version>
+	<description>PLG_FIELDS_JTFILEUPLOAD_XML_DESCRIPTION</description>
+
+	<!-- Scripts to run on installation -->
+	<scriptfile></scriptfile>
+
+	<!-- Language files -->
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_fields_jtfileupload.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_fields_jtfileupload.sys.ini</language>
+	</languages>
+
+	<!-- Plugin files -->
+	<files>
+		<filename plugin="jtfileupload">jtfileupload.php</filename>
+		<folder>language</folder>
+	</files>
+
+	<!-- Update servers -->
+	<updateservers>
+		<server type="extension" priority="1" name="PLG_FIELDS_JTFILEUPLOAD">https://raw.githubusercontent.com/JoomTools/plg_fields_jtfileupload/master/update.xml</server>
+	</updateservers>
+</extension>

@@ -4,7 +4,7 @@
         <fieldset name="fieldparams">
             <field name="savePath"
                    type="text"
-                   label="PLG_FIELDS_SCHUWEB_PDF_UPLOAD_SAVEPATH"
+                   label="PLG_FIELDS_JTFILEUPLOAD_SAVEPATH"
             />
         </fieldset>
     </fields>

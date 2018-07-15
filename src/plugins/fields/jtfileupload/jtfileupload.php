@@ -22,7 +22,7 @@ JFormHelper::addRulePath(JPATH_PLUGINS . '/fields/foo/rules');
  * @package  [PACKAGE_NAME]
  * @since    1.0
  */
-class plgFieldsFoo extends FieldsPlugin
+class plgFieldsJtfileupload extends FieldsPlugin
 {
 	/**
 	 * Application object
