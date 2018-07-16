@@ -1,10 +1,11 @@
 <?php
 /**
- * @package     ${NAMESPACE}
- * @subpackage
+ * @package      Joomla.Plugin
+ * @subpackage   Fields.JtFileUpload
  *
- * @copyright   A copyright
- * @license     A "Slug" license name e.g. GPL2
+ * @author       Sven Schultschik
+ * @copyright    (c) 2018 JoomTools.de - All rights reserved
+ * @license      GNU General Public License version 3 or later
  */
 
 defined('_JEXEC') or die;
