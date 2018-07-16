@@ -71,17 +71,16 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onCustomFieldsPrepareDom($field, DOMElement $parent, JForm $form)
 	{
+        $fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
+
 		// Execute only if we had a jtfileupload
-		if ($field->type == 'jtfileupload')
+		if ($field->type != 'jtfileupload')
 		{
-			return parent::onCustomFieldsPrepareDom($field, $parent, $form);
+			return $fieldNode;
 		}
 
 		// Set Fieldname
-		if ($field->type == 'jtfileupload')
-		{
-			$this->fieldname[] = $field->name;
-		}
+        $this->fieldname[] = $field->name;
 
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
@@ -89,8 +88,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	               });";
 
 		JFactory::getDocument()->addScriptDeclaration($script);
-
-		$fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
 
 		if (!$fieldNode)
 		{
@@ -130,7 +127,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			echo $item['com_fields'][$name];
 			echo '</p>';
 		}
-		
+
 		$input     = $this->app->input;
 		$files     = $input->files;
 
