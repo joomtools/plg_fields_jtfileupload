@@ -117,20 +117,19 @@ class plgFieldsJtfileupload extends FieldsPlugin
             return false;
         }
 
+        //Get the uploaded files object
         $input = $this->app->input;
         $files = $input->files;
 
-        echo '<p>name</p> ';
-        print_r($this->fieldName);
+        //Get the file object for the form
         $file = $files->get("jform");
         $fileSub = $file['com_fields'][$this->fieldName];
 
-        echo "<p>file</p>";
-        print_r($file);
-
+        //Make the filename safe for the Web
         $filename = JFile::makeSafe($fileSub['name']);
-echo "<p>filename</p>"; echo $filename;
+        $filename = str_replace(" ", "_", $filename);
 
+        //Upload the file
         $src = $fileSub['tmp_name'];
         $dest = JPATH_SITE . "/images/jtfileupload/" . $filename;
 
@@ -139,21 +138,7 @@ echo "<p>filename</p>"; echo $filename;
         } else {
             //failed
         }
-
-        if (!empty($_FILES)) {
-            //print_r($_FILES);
-
-
-            echo '<p>';
-            //    $jinput          = new \Jtf\Input\Files;
-            //    $submitedFiles     = $jinput->get($formTheme);
-            //   $submitedValues = array_merge_recursive($submitedValues, $submitedFiles);
-        } else {
-            echo '<p>empty</p>';
-        };
-        // $this->getForm()->bind($submitedValues);
-        //$this->setFieldValidates();
-        //$valid = $this->getForm()->validate($submitedValues);
+        
 
         echo "<p>context</p>";
         print_r($context);
