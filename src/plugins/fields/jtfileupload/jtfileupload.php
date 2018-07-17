@@ -32,7 +32,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 * @var     Array
 	 * @since   __DEPLOY_VERSION__
 	 */
-	protected $fieldname = [];
+	protected $fieldName;
 
 	/**
 	 * Application object
@@ -80,7 +80,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		}
 
 		// Set Fieldname
-        $this->fieldname[] = $field->name;
+        $this->fieldName = $field->name;
 
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
@@ -114,27 +114,34 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
 		// Array with fieldnames uses jtfileupload
-		$fieldname = $this->fieldname;
-
-		if (empty($fieldname))
+		if ($this->fieldName = "")
 		{
-			return true;
-		}
-
-		foreach ($fieldname as $name)
-		{
-			echo '<p>';
-			echo $item['com_fields'][$name];
-			echo '</p>';
+			return false;
 		}
 
 		$input     = $this->app->input;
 		$files     = $input->files;
 
-		print_r($this->params->get('type'));
-		echo '<p>name</p>';
-		//$files->get
-		if (!empty($_FILES))
+		echo '<p>name</p> ';print_r( $this->fieldName);
+
+		$file = $files->get($this->fieldName);
+
+		print_r($files);
+
+        $filename = JFile::makeSafe($file['name']);
+
+        $src = $file['tmp_name'];
+        $dest = JPATH_SITE . "/images/jtfileupload/". $filename;
+
+        if (JFile::upload($src, $dest))
+        {
+            //success
+        } else
+        {
+            //failed
+        }
+
+        if (!empty($_FILES))
 		{
 			//print_r($_FILES);
 
@@ -163,6 +170,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		print_r($isNew);
 		echo "<p>";
 		print_r($data);
-//die();
+die();
 	}
 }
