@@ -122,15 +122,16 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
         echo '<p>name</p> ';
         print_r($this->fieldName);
-        $file = $files->get($this->fieldName);
+        $file = $files->get("jform");
+        $fileSub = $file['com_fields'][$this->fieldName];
 
         echo "<p>file</p>";
         print_r($file);
 
-        $filename = JFile::makeSafe($file['name']);
+        $filename = JFile::makeSafe($fileSub['name']);
 echo "<p>filename</p>"; echo $filename;
 
-        $src = $file['tmp_name'];
+        $src = $fileSub['tmp_name'];
         $dest = JPATH_SITE . "/images/jtfileupload/" . $filename;
 
         if (JFile::upload($src, $dest)) {
