@@ -33,7 +33,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
      * @since   __DEPLOY_VERSION__
      */
     protected $fieldName = "";
-    protected $fieldNameA = array();
 
     /**
      * Application object
@@ -80,10 +79,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
         }
 
         // Set Fieldname
-        if ($field->name != "") {
+        if ($field->name != "")
             $this->fieldName = $field->name;
-            $this->fieldNameA[] = $field->name;
-        }
 
         // Add enctype to formtag
         $script = "jQuery(document).ready(function($){ 
@@ -116,7 +113,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
     public function onContentBeforeSave($context, $item, $isNew, $data = array())
     {
         // Array with fieldnames uses jtfileupload
-        if ($this->fieldName = "") {
+        if ($this->fieldName == "") {
             return false;
         }
 
@@ -125,14 +122,13 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
         echo '<p>name</p> ';
         print_r($this->fieldName);
-        echo '<p>name</p> ';
-        print_r($this->fieldNameA);
-        die();
         $file = $files->get($this->fieldName);
 
-        print_r($files);
+        echo "<p>file</p>";
+        print_r($file);
 
         $filename = JFile::makeSafe($file['name']);
+echo "<p>filename</p>"; echo $filename;
 
         $src = $file['tmp_name'];
         $dest = JPATH_SITE . "/images/jtfileupload/" . $filename;
@@ -158,7 +154,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
         //$this->setFieldValidates();
         //$valid = $this->getForm()->validate($submitedValues);
 
-
+        echo "<p>context</p>";
         print_r($context);
 
         echo "<p>";
