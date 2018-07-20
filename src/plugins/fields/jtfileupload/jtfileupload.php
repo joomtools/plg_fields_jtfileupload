@@ -112,6 +112,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
      */
     public function onContentBeforeSave($context, $item, $isNew, $data = array())
     {
+        //TODO CHECK if user is allowed to upload
+
         // Array with fieldnames uses jtfileupload
         if ($this->fieldName == "") {
             return false;
@@ -129,14 +131,27 @@ class plgFieldsJtfileupload extends FieldsPlugin
         $filename = JFile::makeSafe($fileSub['name']);
         $filename = str_replace(" ", "_", $filename);
 
+        //TODO check error in fileSub
+
+        //Do some checks of the file
+        if (!ends_with($fileSub['type'],"pdf")){
+            JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
+
+            return false;
+        }
+
+        //TODO check filesize
+
         //Upload the file
         $src = $fileSub['tmp_name'];
         $dest = JPATH_SITE . "/images/jtfileupload/" . $filename;
 
         if (JFile::upload($src, $dest)) {
             //success
+
         } else {
-            //failed
+            JLog::add('JTFILEUPLOAD_UPLOAD_FAILED', JLog::ERROR);
+            return false;
         }
         
 
@@ -151,6 +166,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
         print_r($isNew);
         echo "<p>";
         print_r($data);
-        die();
+
     }
 }
