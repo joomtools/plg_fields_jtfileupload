@@ -13,8 +13,6 @@ defined('_JEXEC') or die;
 use Joomla\CMS\Application\CMSApplication;
 
 JLoader::import('components.com_fields.libraries.fieldsplugin', JPATH_ADMINISTRATOR);
-JFormHelper::addRulePath(JPATH_PLUGINS . '/fields/foo/rules');
-//JForm::getInstance()->validate($submitedValues);
 
 /**
  * JtFileUpload plugin.
@@ -167,5 +165,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
         echo "<p>";
         print_r($data);
 
+        return true;
     }
 }
