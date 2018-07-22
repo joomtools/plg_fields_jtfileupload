@@ -84,11 +84,13 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		// Set Fieldname
 		if ($field->name != "")
+		{
 			$this->fieldName = $field->name;
+		}
 
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
-	                    $('form#adminForm').attr('enctype','multipart/form-data');
+	                    $('form[name=\"adminForm\"]').attr('enctype','multipart/form-data');
 	               });";
 
 		Factory::getDocument()->addScriptDeclaration($script);
@@ -140,7 +142,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		// TODO Remove f0f/fof/fof30 etc.
 		//Do some checks of the file
-		if (!ends_with($fileSub['type'], "pdf"))
+		if (!in_array($fileSub['type'], array("pdf")))
 		{
 			JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
 
