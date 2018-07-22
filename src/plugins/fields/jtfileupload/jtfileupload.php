@@ -1,11 +1,11 @@
 <?php
 /**
- * @package      Joomla.Plugin
- * @subpackage   Fields.JtFileUpload
+ * @package          Joomla.Plugin
+ * @subpackage       Fields.JtFileUpload
  *
- * @author       Sven Schultschik
+ * @author           Sven Schultschik
  * @copyright    (c) 2018 JoomTools.de - All rights reserved
- * @license      GNU General Public License version 3 or later
+ * @license          GNU General Public License version 3 or later
  */
 
 defined('_JEXEC') or die;
@@ -38,6 +38,21 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	protected $fieldName = "";
 
 	/**
+	 * Field ID
+	 *
+	 * @var     Integer
+	 * @since   __DEPLOY_VERSION__
+	 */
+	protected $fieldId;
+
+	/**
+	 * File Name
+	 * @var     String
+	 * @since   __DEPLOY_VERSION__
+	 */
+	protected $fileName = "";
+
+	/**
 	 * Application object
 	 *
 	 * @var     CMSApplication
@@ -64,9 +79,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * Transforms the field into a DOM XML element and appends it as a child on the given parent.
 	 *
-	 * @param   stdClass    $field   The field.
-	 * @param   DOMElement  $parent  The field node parent.
-	 * @param   JForm       $form    The form.
+	 * @param   stdClass   $field  The field.
+	 * @param   DOMElement $parent The field node parent.
+	 * @param   JForm      $form   The form.
 	 *
 	 * @return   DOMElement
 	 *
@@ -88,6 +103,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			$this->fieldName = $field->name;
 		}
 
+		$this->fieldId = $field->id;
+
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
 	                    $('form[name=\"adminForm\"]').attr('enctype','multipart/form-data');
@@ -108,10 +125,10 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * The save event.
 	 *
-	 * @param   string   $context  The context
-	 * @param   JTable   $item     The table
-	 * @param   boolean  $isNew    Is new item
-	 * @param   array    $data     The validated data
+	 * @param   string  $context The context
+	 * @param   JTable  $item    The table
+	 * @param   boolean $isNew   Is new item
+	 * @param   array   $data    The validated data
 	 *
 	 * @return   boolean
 	 *
@@ -165,27 +182,46 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		if (JFile::upload($src, $destination))
 		{
+			$this->fileName = $filename;
 			//success
-
 		}
 		else
 		{
 			JLog::add('JTFILEUPLOAD_UPLOAD_FAILED', JLog::ERROR);
+
 			return false;
 		}
 
+		return true;
+	}
 
-		echo "<p>context</p>";
-		print_r($context);
-
-		echo "<p>";
-
-		print_r($item);
-		echo "<p>";
-
-		print_r($isNew);
-		echo "<p>";
-		print_r($data);
+	/**
+	 * The save event.
+	 *
+	 * @param   string  $context The context
+	 * @param   JTable  $item    The table
+	 * @param   boolean $isNew   Is new item
+	 * @param   array   $data    The validated data
+	 *
+	 * @return  boolean
+	 *
+	 * @since   3.7.0
+	 */
+	public function onContentAfterSave($context, $item, $isNew, $data = array())
+	{
+		$db    = $this->db;
+		$query = $db->getQuery();
+		$query->insert('#__fields_values')
+			->columns(
+				array(
+					$db->quoteName('field_id'),
+					$db->quoteName('item_id'),
+					$db->quoteName('value')
+				)
+			)
+			->values((int) $this->fieldId . ', ' . (int) $item->id . ', ' . $db->quote($this->fileName));
+		$db->setQuery($query);
+		$db->execute();
 
 		return true;
 	}
