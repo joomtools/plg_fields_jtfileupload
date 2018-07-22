@@ -132,7 +132,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
         //TODO check error in fileSub
 
         //Do some checks of the file
-        if (!ends_with($fileSub['type'],"pdf")){
+        if (!ends_with($fileSub['type'], "pdf")) {
             JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
 
             return false;
@@ -142,16 +142,24 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
         //Upload the file
         $src = $fileSub['tmp_name'];
-        $dest = JPATH_SITE . "/images/jtfileupload/" . $filename;
+        $destinationPath = JPATH_SITE . "/images/jtfileupload/";
+        $destination = $destinationPath . $filename;
 
-        if (JFile::upload($src, $dest)) {
+        //Add a postfix if file already exist
+        while (JFile::exists($destination)) {
+            $filename = JFile::stripExt($filename) . "_" . rand() . "." . JFile::getExt($filename);
+            $destination = $destinationPath . $filename;
+            $this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
+        }
+
+        if (JFile::upload($src, $destination)) {
             //success
 
         } else {
             JLog::add('JTFILEUPLOAD_UPLOAD_FAILED', JLog::ERROR);
             return false;
         }
-        
+
 
         echo "<p>context</p>";
         print_r($context);
