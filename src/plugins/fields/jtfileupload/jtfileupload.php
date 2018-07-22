@@ -140,9 +140,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		//TODO check error in fileSub
 
-		// TODO Remove f0f/fof/fof30 etc.
 		//Do some checks of the file
-		if (!in_array($fileSub['type'], array("pdf")))
+		if (!in_array(strtolower(JFile::getExt($filename)), array('pdf')))
 		{
 			JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
 
