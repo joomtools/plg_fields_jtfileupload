@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <updates>
 	<update>
-		<name>Field - JtFileUpload </name>
+		<name>Field - JT - FileUpload </name>
 		<description></description>
 		<element>jtfileupload</element>
 		<type>plugin</type>
