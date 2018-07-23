@@ -18,10 +18,12 @@ if ($fieldValue === '' || $fieldValue === null)
 }
 
 $fileType = JFile::getExt($fieldValue);
-$type = "";
+$type     = "";
 if (strtolower($fileType) == 'pdf')
 {
 	$type = 'type="application/pdf"';
 }
 
-echo '<a href="' . JUri::base() . "/images/jtfileupload/" . $fieldValue . '" ' . $type . ' rel="nofollow">' . JFile::stripExt($fieldValue) . '</a>';
+$displayName = str_replace("_", " ", JFile::stripExt($fieldValue));
+
+echo '<a href="' . JUri::base() . "/images/jtfileupload/" . $fieldValue . '" ' . $type . ' rel="nofollow">' . $displayName . '</a>';
