@@ -17,4 +17,11 @@ if ($fieldValue === '' || $fieldValue === null)
 	return;
 }
 
-echo '<a href="' . JUri::base() . "/images/jtfileupload/" . $fieldValue . '">' . JFile::stripExt($fieldValue) . '</a>';
+$fileType = JFile::getExt($fieldValue);
+$type = "";
+if (strtolower($fileType) == 'pdf')
+{
+	$type = 'type="application/pdf"';
+}
+
+echo '<a href="' . JUri::base() . "/images/jtfileupload/" . $fieldValue . '" ' . $type . ' rel="nofollow">' . JFile::stripExt($fieldValue) . '</a>';
