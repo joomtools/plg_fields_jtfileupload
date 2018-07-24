@@ -53,6 +53,14 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	protected $fileName = "";
 
 	/**
+	 * Required
+	 *
+	 * @var bool int
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected $required;
+
+	/**
 	 * Application object
 	 *
 	 * @var     CMSApplication
@@ -103,7 +111,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			$this->fieldName = $field->name;
 		}
 
-		$this->fieldId = $field->id;
+		$this->fieldId  = $field->id;
+		$this->required = $field->required;
 
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
@@ -138,7 +147,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	{
 		//TODO CHECK if user is allowed to upload
 
-		// Array with fieldnames uses jtfileupload
+		//fieldname uses jtfileupload
 		if ($this->fieldName == "")
 		{
 			return false;
@@ -150,6 +159,16 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		//Get the file object for the form
 		$file    = $files->get("jform");
 		$fileSub = $file['com_fields'][$this->fieldName];
+
+		//No file was uploaded
+		if ((int) $fileSub['error'] === 4 && !$this->required)
+		{
+			return true;
+		}
+		else if ((int) $fileSub['error'] === 4 && $this->required)
+		{
+			return false;
+		}
 
 		//Make the filename safe for the Web
 		$filename = JFile::makeSafe($fileSub['name']);
