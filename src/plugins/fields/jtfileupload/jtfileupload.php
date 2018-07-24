@@ -228,6 +228,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onContentAfterSave($context, $item, $isNew, $data = array())
 	{
+		if (empty($this->fileName)) return true;
+		
 		$db    = $this->db;
 		$query = $db->getQuery();
 		$query->insert('#__fields_values')
