@@ -199,7 +199,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		//Add a postfix if file already exist
 		while (file_exists($destination))
 		{
-			$filename    = File::stripExt($filename) . "_" . rand() . "." . File::getExt($filename);
+			$path_parts = pathinfo($filename);
+			$filename    = File::stripExt($filename) . "_" . rand() . "." . $path_parts['extension'];
 			$destination = $destinationPath . $filename;
 			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
 		}
