@@ -12,6 +12,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory;
+use Joomla\Filesystem\File;
 
 JLoader::import('components.com_fields.libraries.fieldsplugin', JPATH_ADMINISTRATOR);
 JLoader::registerNamespace('JtFileUpload', JPATH_PLUGINS . '/fields/jtfileupload/libraries/jtfileupload', false, false, 'psr4');
@@ -146,7 +147,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
 		//TODO CHECK if user is allowed to upload
-		
+
 		if ($context != "com_content.form")
 			return;
 
@@ -174,13 +175,14 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		}
 
 		//Make the filename safe for the Web
-		$filename = JFile::makeSafe($fileSub['name']);
+		$filename = File::makeSafe($fileSub['name']);
 		$filename = str_replace(" ", "_", $filename);
 
 		//TODO check error in fileSub
 
 		//Do some checks of the file
-		if (!in_array(strtolower(JFile::getExt($filename)), array('pdf')))
+		$path_parts = pathinfo($filename);
+		if (!in_array(strtolower($path_parts['extension']), array('pdf')))
 		{
 			JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
 
@@ -195,14 +197,14 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		$destination     = $destinationPath . $filename;
 
 		//Add a postfix if file already exist
-		while (JFile::exists($destination))
+		while (file_exists($destination))
 		{
-			$filename    = JFile::stripExt($filename) . "_" . rand() . "." . JFile::getExt($filename);
+			$filename    = File::stripExt($filename) . "_" . rand() . "." . File::getExt($filename);
 			$destination = $destinationPath . $filename;
 			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
 		}
 
-		if (JFile::upload($src, $destination))
+		if (File::upload($src, $destination))
 		{
 			$this->fileName = $filename;
 			//success
@@ -232,7 +234,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	public function onContentAfterSave($context, $item, $isNew, $data = array())
 	{
 		if (empty($this->fileName)) return true;
-		
+
 		$db    = $this->db;
 		$query = $db->getQuery();
 		$query->insert('#__fields_values')
