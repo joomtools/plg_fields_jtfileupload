@@ -237,7 +237,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		if (empty($this->fileName)) return true;
 
 		$db    = $this->db;
-		$query = $db->getQuery();
+		$query = $db->getQuery(true);
 		$query->insert('#__fields_values')
 			->columns(
 				array(
