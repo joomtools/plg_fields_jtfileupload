@@ -200,7 +200,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		while (file_exists($destination))
 		{
 			$path_parts = pathinfo($filename);
-			$filename    = File::stripExt($filename) . "_" . rand() . "." . $path_parts['extension'];
+			$filename    = $path_parts['filename'] . "_" . rand() . "." . $path_parts['extension'];
 			$destination = $destinationPath . $filename;
 			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
 		}
