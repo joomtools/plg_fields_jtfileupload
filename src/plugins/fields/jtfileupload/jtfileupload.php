@@ -146,6 +146,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
 		//TODO CHECK if user is allowed to upload
+		
+		if ($context != "com_content.form")
+			return;
 
 		//fieldname uses jtfileupload
 		if ($this->fieldName == "")
