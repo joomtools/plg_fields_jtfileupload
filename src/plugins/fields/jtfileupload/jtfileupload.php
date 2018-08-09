@@ -54,6 +54,13 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	protected $fileName = "";
 
 	/**
+	 * Save Path for files
+	 * @var string
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected $savePath = "";
+
+	/**
 	 * Required
 	 *
 	 * @var bool int
@@ -114,6 +121,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		$this->fieldId  = $field->id;
 		$this->required = $field->required;
+		$this->savePath = $field->fieldparams->get("savePath");
 
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
@@ -146,8 +154,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
-		//TODO CHECK if user is allowed to upload
-
 		if ($context != "com_content.form")
 			return;
 
@@ -193,13 +199,13 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		//Upload the file
 		$src             = $fileSub['tmp_name'];
-		$destinationPath = JPATH_SITE . "/images/jtfileupload/";
-		$destination     = $destinationPath . $filename;
+		$destinationPath = JPATH_SITE . "/" . $this->savePath;
+		$destination     = $destinationPath . "/" . $filename;
 
 		//Add a postfix if file already exist
 		while (file_exists($destination))
 		{
-			$path_parts = pathinfo($filename);
+			$path_parts  = pathinfo($filename);
 			$filename    = $path_parts['filename'] . "_" . rand() . "." . $path_parts['extension'];
 			$destination = $destinationPath . $filename;
 			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');

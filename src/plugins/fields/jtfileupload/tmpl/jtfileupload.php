@@ -11,19 +11,21 @@
 defined('_JEXEC') or die;
 
 $fieldValue = $field->value;
+$savePath   = $field->fieldparams->get("savePath");
 
 if ($fieldValue === '' || $fieldValue === null)
 {
 	return;
 }
 
-$fileType = JFile::getExt($fieldValue);
-$type     = "";
+$path_parts = pathinfo($fieldValue);
+$fileType   = $path_parts['extension'];
+$type       = "";
 if (strtolower($fileType) == 'pdf')
 {
 	$type = 'type="application/pdf"';
 }
 
-$displayName = str_replace("_", " ", JFile::stripExt($fieldValue));
+$displayName = str_replace("_", " ", $path_parts['filename']);
 
-echo '<a href="' . JUri::base() . "/images/jtfileupload/" . $fieldValue . '" ' . $type . ' rel="nofollow">' . $displayName . '</a>';
+echo '<a href="' . JUri::base() . $savePath . "/" . $fieldValue . '" ' . $type . ' rel="nofollow">' . $displayName . '</a>';
