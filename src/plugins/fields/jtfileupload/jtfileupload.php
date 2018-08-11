@@ -30,43 +30,7 @@ JLoader::registerNamespace('Joomla\\CMS\\Form\\Rule', JPATH_PLUGINS . '/fields/j
  */
 class plgFieldsJtfileupload extends FieldsPlugin
 {
-	/**
-	 * Fieldname
-	 *
-	 * @var     String
-	 * @since   __DEPLOY_VERSION__
-	 */
-	protected $fieldName = "";
-
-	/**
-	 * Field ID
-	 *
-	 * @var     Integer
-	 * @since   __DEPLOY_VERSION__
-	 */
-	protected $fieldId;
-
-	/**
-	 * File Name
-	 * @var     String
-	 * @since   __DEPLOY_VERSION__
-	 */
-	protected $fileName = "";
-
-	/**
-	 * Save Path for files
-	 * @var string
-	 * @since __DEPLOY_VERSION__
-	 */
-	protected $savePath = "";
-
-	/**
-	 * Required
-	 *
-	 * @var bool int
-	 * @since __DEPLOY_VERSION__
-	 */
-	protected $required;
+	protected $fieldDatas = array();
 
 	/**
 	 * Application object
@@ -116,12 +80,14 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		// Set Fieldname
 		if ($field->name != "")
 		{
-			$this->fieldName = $field->name;
+			$this->fieldDatas[$field->name]["fieldName"] = $field->name;
 		}
 
-		$this->fieldId  = $field->id;
-		$this->required = $field->required;
-		$this->savePath = $field->fieldparams->get("savePath");
+		$this->fieldDatas[$field->name]["fieldId"]  = $field->id;
+		$this->fieldDatas[$field->name]["required"] = $field->required;
+		$this->fieldDatas[$field->name]["savePath"] = $field->fieldparams->get("savePath");
+		$this->fieldDatas[$field->name]["uploaded"] = false;
+
 
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
@@ -158,69 +124,75 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			return;
 
 		//fieldname uses jtfileupload
-		if ($this->fieldName == "")
+		if (empty($this->fieldDatas))
 		{
 			return false;
 		}
 
 		//Get the uploaded files object
 		$files = new JtFileUpload\Input\Files;
+		$file  = $files->get("jform");
 
-		//Get the file object for the form
-		$file    = $files->get("jform");
-		$fileSub = $file['com_fields'][$this->fieldName];
-
-		//No file was uploaded
-		if ((int) $fileSub['error'] === 4 && !$this->required)
+		foreach ($this->fieldDatas as $fieldData)
 		{
-			return true;
-		}
-		else if ((int) $fileSub['error'] === 4 && $this->required)
-		{
-			return false;
-		}
+			if ($fieldData["uploaded"]) continue;
 
-		//Make the filename safe for the Web
-		$filename = File::makeSafe($fileSub['name']);
-		$filename = str_replace(" ", "_", $filename);
+			//Get the file object for the form
+			$fileSub = $file['com_fields'][$fieldData["fieldName"]];
 
-		//TODO check error in fileSub
+			//No file was uploaded
+			if ((int) $fileSub['error'] === 4 && !$fieldData["required"])
+			{
+				return true;
+			}
+			else if ((int) $fileSub['error'] === 4 && $fieldData["required"])
+			{
+				return false;
+			}
 
-		//Do some checks of the file
-		$path_parts = pathinfo($filename);
-		if (!in_array(strtolower($path_parts['extension']), array('pdf')))
-		{
-			JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
+			//Make the filename safe for the Web
+			$filename = File::makeSafe($fileSub['name']);
+			$filename = str_replace(" ", "_", $filename);
 
-			return false;
-		}
+			//TODO check error in fileSub
 
-		//TODO check filesize
+			//Do some checks of the file
+			$path_parts = pathinfo($filename);
+			if (!in_array(strtolower($path_parts['extension']), array('pdf')))
+			{
+				JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
 
-		//Upload the file
-		$src             = $fileSub['tmp_name'];
-		$destinationPath = JPATH_SITE . "/" . $this->savePath;
-		$destination     = $destinationPath . "/" . $filename;
+				return false;
+			}
 
-		//Add a postfix if file already exist
-		while (file_exists($destination))
-		{
-			$path_parts  = pathinfo($filename);
-			$filename    = $path_parts['filename'] . "_" . rand() . "." . $path_parts['extension'];
-			$destination = $destinationPath . $filename;
-			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
-		}
+			//TODO check filesize
 
-		if (File::upload($src, $destination))
-		{
-			$this->fileName = $filename;
-			//success
-		}
-		else
-		{
-			JLog::add('JTFILEUPLOAD_UPLOAD_FAILED', JLog::ERROR);
+			//Upload the file
+			$src             = $fileSub['tmp_name'];
+			$destinationPath = JPATH_SITE . "/" . $fieldData["savePath"];
+			$destination     = $destinationPath . "/" . $filename;
 
-			return false;
+			//Add a postfix if file already exist
+			while (file_exists($destination))
+			{
+				$path_parts  = pathinfo($filename);
+				$filename    = $path_parts['filename'] . "_" . rand() . "." . $path_parts['extension'];
+				$destination = $destinationPath . "/" . $filename;
+				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
+			}
+
+			if (File::upload($src, $destination))
+			{
+				$this->fieldDatas[$fieldData["fieldName"]]["uploaded"]     = true;
+				$this->fieldDatas[$fieldData["fieldName"]]["fileNameSafe"] = $filename;
+				//success
+			}
+			else
+			{
+				JLog::add('JTFILEUPLOAD_UPLOAD_FAILED', JLog::ERROR);
+
+				return false;
+			}
 		}
 
 		return true;
@@ -240,9 +212,21 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onContentAfterSave($context, $item, $isNew, $data = array())
 	{
-		if (empty($this->fileName)) return true;
+		if (empty($this->fieldDatas)) return true;
 
-		$db    = $this->db;
+		$dbValues = array();
+		$db       = $this->db;
+
+		foreach ($this->fieldDatas as $fieldData)
+		{
+			if ($fieldData["uploaded"])
+			{
+				$dbValues[] = (int) $fieldData["fieldId"] . ', ' . (int) $item->id . ', ' . $db->quote($fieldData["fileNameSafe"]);
+			}
+		}
+
+		if (empty($dbValues)) return true;
+
 		$query = $db->getQuery(true);
 		$query->insert('#__fields_values')
 			->columns(
@@ -252,7 +236,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 					$db->quoteName('value')
 				)
 			)
-			->values((int) $this->fieldId . ', ' . (int) $item->id . ', ' . $db->quote($this->fileName));
+			->values($dbValues);
 		$db->setQuery($query);
 		$db->execute();
 
