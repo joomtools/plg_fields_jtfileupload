@@ -1,20 +1,24 @@
 <?php
 /**
- * @package      Joomla.Plugin
- * @subpackage   Fields.JtFileUpload
+ * @package          Joomla.Plugin
+ * @subpackage       Fields.JtFileUpload
  *
- * @author       Sven Schultschik
+ * @author           Sven Schultschik
  * @copyright    (c) 2018 JoomTools.de - All rights reserved
- * @license      GNU General Public License version 3 or later
+ * @license          GNU General Public License version 3 or later
  */
 
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Factory;
+use Joomla\Filesystem\File;
 
 JLoader::import('components.com_fields.libraries.fieldsplugin', JPATH_ADMINISTRATOR);
-JFormHelper::addRulePath(JPATH_PLUGINS . '/fields/foo/rules');
-//JForm::getInstance()->validate($submitedValues);
+JLoader::registerNamespace('JtFileUpload', JPATH_PLUGINS . '/fields/jtfileupload/libraries/jtfileupload', false, false, 'psr4');
+// Add form rules
+JFormHelper::addRulePath(JPATH_PLUGINS . '/content/jtf/libraries/joomla/form/rules');
+JLoader::registerNamespace('Joomla\\CMS\\Form\\Rule', JPATH_PLUGINS . '/fields/jtfileupload/libraries/joomla/form/rules', false, false, 'psr4');
 
 /**
  * JtFileUpload plugin.
@@ -26,13 +30,7 @@ JFormHelper::addRulePath(JPATH_PLUGINS . '/fields/foo/rules');
  */
 class plgFieldsJtfileupload extends FieldsPlugin
 {
-	/**
-	 * Fieldname
-	 *
-	 * @var     Array
-	 * @since   __DEPLOY_VERSION__
-	 */
-	protected $fieldname = [];
+	protected $fieldDatas = array();
 
 	/**
 	 * Application object
@@ -61,9 +59,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * Transforms the field into a DOM XML element and appends it as a child on the given parent.
 	 *
-	 * @param   stdClass    $field   The field.
-	 * @param   DOMElement  $parent  The field node parent.
-	 * @param   JForm       $form    The form.
+	 * @param   stdClass   $field  The field.
+	 * @param   DOMElement $parent The field node parent.
+	 * @param   JForm      $form   The form.
 	 *
 	 * @return   DOMElement
 	 *
@@ -71,26 +69,32 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onCustomFieldsPrepareDom($field, DOMElement $parent, JForm $form)
 	{
+		$fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
+
 		// Execute only if we had a jtfileupload
-		if ($field->type == 'jtfileupload')
+		if ($field->type != 'jtfileupload')
 		{
-			return parent::onCustomFieldsPrepareDom($field, $parent, $form);
+			return $fieldNode;
 		}
 
 		// Set Fieldname
-		if ($field->type == 'jtfileupload')
+		if ($field->name != "")
 		{
-			$this->fieldname[] = $field->name;
+			$this->fieldDatas[$field->name]["fieldName"] = $field->name;
 		}
+
+		$this->fieldDatas[$field->name]["fieldId"]  = $field->id;
+		$this->fieldDatas[$field->name]["required"] = $field->required;
+		$this->fieldDatas[$field->name]["savePath"] = $field->fieldparams->get("savePath");
+		$this->fieldDatas[$field->name]["uploaded"] = false;
+
 
 		// Add enctype to formtag
 		$script = "jQuery(document).ready(function($){ 
-	                    $('form#adminForm').attr('enctype','multipart/form-data');
+	                    $('form[name=\"adminForm\"]').attr('enctype','multipart/form-data');
 	               });";
 
-		JFactory::getDocument()->addScriptDeclaration($script);
-
-		$fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
+		Factory::getDocument()->addScriptDeclaration($script);
 
 		if (!$fieldNode)
 		{
@@ -105,10 +109,10 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * The save event.
 	 *
-	 * @param   string   $context  The context
-	 * @param   JTable   $item     The table
-	 * @param   boolean  $isNew    Is new item
-	 * @param   array    $data     The validated data
+	 * @param   string  $context The context
+	 * @param   JTable  $item    The table
+	 * @param   boolean $isNew   Is new item
+	 * @param   array   $data    The validated data
 	 *
 	 * @return   boolean
 	 *
@@ -116,56 +120,126 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
-		// Array with fieldnames uses jtfileupload
-		$fieldname = $this->fieldname;
+		if ($context != "com_content.form")
+			return;
 
-		if (empty($fieldname))
+		//fieldname uses jtfileupload
+		if (empty($this->fieldDatas))
 		{
-			return true;
+			return false;
 		}
 
-		foreach ($fieldname as $name)
+		//Get the uploaded files object
+		$files = new JtFileUpload\Input\Files;
+		$file  = $files->get("jform");
+
+		foreach ($this->fieldDatas as $fieldData)
 		{
-			echo '<p>';
-			echo $item['com_fields'][$name];
-			echo '</p>';
+			if ($fieldData["uploaded"]) continue;
+
+			//Get the file object for the form
+			$fileSub = $file['com_fields'][$fieldData["fieldName"]];
+
+			//No file was uploaded
+			if ((int) $fileSub['error'] === 4 && !$fieldData["required"])
+			{
+				return true;
+			}
+			else if ((int) $fileSub['error'] === 4 && $fieldData["required"])
+			{
+				return false;
+			}
+
+			//Make the filename safe for the Web
+			$filename = File::makeSafe($fileSub['name']);
+			$filename = str_replace(" ", "_", $filename);
+
+			//TODO check error in fileSub
+
+			//Do some checks of the file
+			$path_parts = pathinfo($filename);
+			if (!in_array(strtolower($path_parts['extension']), array('pdf')))
+			{
+				JLog::add('JTFILEUPLOAD_NOT_A_PDF', JLog::ERROR);
+
+				return false;
+			}
+
+			//TODO check filesize
+
+			//Upload the file
+			$src             = $fileSub['tmp_name'];
+			$destinationPath = JPATH_SITE . "/" . $fieldData["savePath"];
+			$destination     = $destinationPath . "/" . $filename;
+
+			//Add a postfix if file already exist
+			while (file_exists($destination))
+			{
+				$path_parts  = pathinfo($filename);
+				$filename    = $path_parts['filename'] . "_" . rand() . "." . $path_parts['extension'];
+				$destination = $destinationPath . "/" . $filename;
+				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
+			}
+
+			if (File::upload($src, $destination))
+			{
+				$this->fieldDatas[$fieldData["fieldName"]]["uploaded"]     = true;
+				$this->fieldDatas[$fieldData["fieldName"]]["fileNameSafe"] = $filename;
+				//success
+			}
+			else
+			{
+				JLog::add('JTFILEUPLOAD_UPLOAD_FAILED', JLog::ERROR);
+
+				return false;
+			}
 		}
-		
-		$input     = $this->app->input;
-		$files     = $input->files;
 
-		print_r($this->params->get('type'));
-		echo '<p>name</p>';
-		//$files->get
-		if (!empty($_FILES))
+		return true;
+	}
+
+	/**
+	 * The save event.
+	 *
+	 * @param   string  $context The context
+	 * @param   JTable  $item    The table
+	 * @param   boolean $isNew   Is new item
+	 * @param   array   $data    The validated data
+	 *
+	 * @return  boolean
+	 *
+	 * @since   3.7.0
+	 */
+	public function onContentAfterSave($context, $item, $isNew, $data = array())
+	{
+		if (empty($this->fieldDatas)) return true;
+
+		$dbValues = array();
+		$db       = $this->db;
+
+		foreach ($this->fieldDatas as $fieldData)
 		{
-			//print_r($_FILES);
-
-
-			echo '<p>';
-			//    $jinput          = new \Jtf\Input\Files;
-			//    $submitedFiles     = $jinput->get($formTheme);
-			//   $submitedValues = array_merge_recursive($submitedValues, $submitedFiles);
+			if ($fieldData["uploaded"])
+			{
+				$dbValues[] = (int) $fieldData["fieldId"] . ', ' . (int) $item->id . ', ' . $db->quote($fieldData["fileNameSafe"]);
+			}
 		}
-		else
-		{
-			echo '<p>empty</p>';
-		};
-		// $this->getForm()->bind($submitedValues);
-		//$this->setFieldValidates();
-		//$valid = $this->getForm()->validate($submitedValues);
 
+		if (empty($dbValues)) return true;
 
-		print_r($context);
+		$query = $db->getQuery(true);
+		$query->insert('#__fields_values')
+			->columns(
+				array(
+					$db->quoteName('field_id'),
+					$db->quoteName('item_id'),
+					$db->quoteName('value')
+				)
+			)
+			->values($dbValues);
+		$db->setQuery($query);
+		$db->execute();
 
-		echo "<p>";
-
-		print_r($item);
-		echo "<p>";
-
-		print_r($isNew);
-		echo "<p>";
-		print_r($data);
-//die();
+		return true;
 	}
 }
