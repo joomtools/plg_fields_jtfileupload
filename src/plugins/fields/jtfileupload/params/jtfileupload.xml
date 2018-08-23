@@ -6,6 +6,14 @@
                    type="text"
                    label="PLG_FIELDS_JTFILEUPLOAD_SAVEPATH"
             />
+            <field name="downloadProtection"
+                   type="radio"
+                   label="PLG_FIELDS_JTFIELUPLOAD_DOWNLOAD_PROTECTION"
+                   class="btn-group btn-group-yesno"
+                   default="0">
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
         </fieldset>
     </fields>
 </form>

@@ -212,6 +212,39 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onContentAfterSave($context, $item, $isNew, $data = array())
 	{
+		if ($context == "com_fields.field")
+		{
+			$savePath           = $data["fieldparams"]["savePath"];
+			$downloadProtection = $data["fieldparams"]["downloadProtection"];
+
+			$filePath = JPATH_SITE . "/" . $savePath . "/.htaccess";
+
+			if ($downloadProtection == 1)
+			{
+				if (file_exists($filePath))
+					return;
+
+				if (substr($savePath, -1) != "/")
+					$savePath .= "/";
+				if (substr($savePath, 0, 1) == "/")
+					$savePath = substr($savePath, 1);
+
+				$bufferPath = str_replace("/", "\/", $savePath);
+				$buffer     = "RewriteRule ^" . $bufferPath . ".*$ readmedia.php [L]";
+				if (!File::write($filePath, $buffer))
+					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_CREATE_HTACCESS", $filePath, $buffer), JLog::ERROR);
+			}
+			else
+			{
+				if (file_exists($filePath))
+					if (!File::delete($filePath))
+						$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_DELETE_HTACCESS", $filePath), JLog::ERROR);
+			}
+		}
+
+		if ($context != "com_content.form")
+			return;
+
 		if (empty($this->fieldDatas)) return true;
 
 		$dbValues = array();
