@@ -120,7 +120,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
-		if ($context != "com_content.form")
+		if (!($context == "com_content.form" || $context == "com_content.article"))
 			return;
 
 		//fieldname uses jtfileupload
@@ -242,7 +242,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			}
 		}
 
-		if ($context != "com_content.form")
+		if (!($context == "com_content.form" || $context == "com_content.article"))
 			return;
 
 		if (empty($this->fieldDatas)) return true;
