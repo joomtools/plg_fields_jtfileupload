@@ -28,4 +28,4 @@ if (strtolower($fileType) == 'pdf')
 
 $displayName = str_replace("_", " ", $path_parts['filename']);
 
-echo '<a href="' . JUri::base() . $savePath . "/" . $fieldValue . '" ' . $type . ' rel="nofollow">' . $displayName . '</a>';
+echo '<a href="' . JUri::base() . trim($savePath, "/") . "/" . $fieldValue . '" ' . $type . ' rel="nofollow">' . $displayName . '</a>';
