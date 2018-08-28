@@ -229,8 +229,13 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				if (substr($savePath, 0, 1) == "/")
 					$savePath = substr($savePath, 1);
 
-				$bufferPath = str_replace("/", "\/", $savePath);
-				$buffer     = "RewriteRule ^" . $bufferPath . ".*$ readmedia.php [L]";
+				//$bufferPath = str_replace("/", "\/", $savePath);
+				//$buffer     = "RewriteRule ^" . $bufferPath . ".*$ readmedia.php [L]";
+
+				$uriInstance = JUri::getInstance();
+				$buffer      = "RewriteCond %{HTTP_REFERER} !^" . $uriInstance->getScheme() . "://" . $uriInstance->getHost() . ".*$ [NC]\r\n
+RewriteRule ^.*$ - [NC,R=403,L]";
+
 				if (!File::write($filePath, $buffer))
 					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_CREATE_HTACCESS", $filePath, $buffer), JLog::ERROR);
 			}
