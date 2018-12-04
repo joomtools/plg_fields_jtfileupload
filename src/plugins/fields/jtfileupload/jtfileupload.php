@@ -71,6 +71,14 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	{
 		$fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
 
+		$params = JComponentHelper::getParams('com_fields');
+
+		$params->set('upload_maxsize', 10);
+		$params->set('upload_extensions', 'pdf,PDF');
+		//$params->Set('ignore_extensions', ???);
+		$params->set('restrict_uploads', 1);
+		//$params->set('image_extensions', ???);
+
 		// Execute only if we had a jtfileupload
 		if ($field->type != 'jtfileupload')
 		{
@@ -102,6 +110,26 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		}
 
 		$fieldNode->setAttribute('accept', '.pdf,.PDF');
+
+		//Edit? File already exist?
+		if (!empty($field->value))
+		{
+			$fieldNode->setAttribute('display', 'none'); //Wirkt nicht warum?
+			$fieldNode->setAttribute('disabled', 'disabled');
+
+
+			print_r($field->value);
+
+			$domDoc   = $parent->ownerDocument;
+			$fileName = $domDoc->createElement("span", $field->value);
+			//print_r($fileName);
+			//return $fileName;
+			$fieldNode->parentNode->appendChild($fileName);
+			$parent->appendChild($fileName);
+
+			$script = "document.getElementById(\"jform_com_fields_" + strtolower($field->name) + "\")";
+			Factory::getDocument()->addScriptDeclaration($script);
+		}
 
 		return $fieldNode;
 	}
@@ -165,28 +193,28 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 		}
 
 		//Get the uploaded files object
-		$files = new JtFileUpload\Input\Files;
-		$file  = $files->get("jform");
+		$allFiles = new JtFileUpload\Input\Files;
+		$files  = $allFiles->get("jform");
 
 		foreach ($this->fieldDatas as $fieldData)
 		{
 			if ($fieldData["uploaded"]) continue;
 
 			//Get the file object for the form
-			$fileSub = $file['com_fields'][$fieldData["fieldName"]];
+			$file = $files['com_fields'][$fieldData["fieldName"]];
 
 			//No file was uploaded
-			if ((int) $fileSub['error'] === 4 && !$fieldData["required"])
+			if ((int) $file['error'] === 4 && !$fieldData["required"])
 			{
 				return true;
 			}
-			else if ((int) $fileSub['error'] === 4 && $fieldData["required"])
+			else if ((int) $file['error'] === 4 && $fieldData["required"])
 			{
 				return false;
 			}
 
 			//Make the filename safe for the Web
-			$filename = File::makeSafe($fileSub['name']);
+			$filename = File::makeSafe($file['name']);
 			$filename = str_replace(" ", "_", $filename);
 
 			//TODO check error in fileSub
@@ -201,12 +229,24 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			}
 
 			//TODO check filesize
+			/*
+			 * if (($file['error'] == 1)
+				|| ($uploadMaxSize > 0 && $file['size'] > $uploadMaxSize)
+				|| ($uploadMaxFileSize > 0 && $file['size'] > $uploadMaxFileSize))
+			{
+				// File size exceed either 'upload_max_filesize' or 'upload_maxsize'.
+				JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_WARNFILETOOLARGE'));
+
+				return false;
+			}
+			 */
 
 			//Upload the file
-			$src             = $fileSub['tmp_name'];
+			$src             = $file['tmp_name'];
 			$destinationPath = JPATH_SITE . "/" . $fieldData["savePath"];
 			$destination     = $destinationPath . "/" . $filename;
 
+			//TODO Add postfix or raise warning that file exists
 			//Add a postfix if file already exist
 			while (file_exists($destination))
 			{
@@ -215,6 +255,9 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 				$destination = $destinationPath . "/" . $filename;
 				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
 			}
+
+			$mediaHelper = new JHelperMedia;
+			if (!$mediaHelper->canUpload($file, 'com_fields')) { return false; }
 
 			if (File::upload($src, $destination))
 			{
