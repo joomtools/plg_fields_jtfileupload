@@ -127,7 +127,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			$fieldNode->parentNode->appendChild($fileName);
 			$parent->appendChild($fileName);
 
-			$script = "document.getElementById(\"jform_com_fields_" + strtolower($field->name) + "\")";
+			$script = "document.getElementById(\"jform_com_fields_" . strtolower($field->name) . "\")";
 			Factory::getDocument()->addScriptDeclaration($script);
 		}
 
