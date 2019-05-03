@@ -77,6 +77,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		$params->set('upload_extensions', 'pdf,PDF');
 		//$params->Set('ignore_extensions', ???);
 		$params->set('restrict_uploads', 1);
+		$params->set('upload_mime', 'application/pdf');
 		//$params->set('image_extensions', ???);
 
 		// Execute only if we had a jtfileupload
@@ -111,21 +112,15 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		$fieldNode->setAttribute('accept', '.pdf,.PDF');
 
+
 		//Edit? File already exist?
 		if (!empty($field->value))
 		{
-			$fieldNode->setAttribute('display', 'none'); //Wirkt nicht warum?
-			$fieldNode->setAttribute('disabled', 'disabled');
+			//echo "Field value " ;print_r($field->value);
 
-
-			print_r($field->value);
-
-			$domDoc   = $parent->ownerDocument;
-			$fileName = $domDoc->createElement("span", $field->value);
-			//print_r($fileName);
-			//return $fileName;
-			$fieldNode->parentNode->appendChild($fileName);
-			$parent->appendChild($fileName);
+			$fieldNode->setAttribute('fileExist', true);
+			$fieldNode->setAttribute('fileName', $field->value);
+			//echo '<h1>Field Node</h1>';var_dump($fieldNode->getAttribute('fileName'));
 
 			$script = "document.getElementById(\"jform_com_fields_" . strtolower($field->name) . "\")";
 			Factory::getDocument()->addScriptDeclaration($script);
