@@ -101,7 +101,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 		if ($return)
 		{
 			$this->fileExist = (string) $this->element['fileExist'];
-			$this->fileName = (string) $this->element['fileName'];
+			$this->fileName  = (string) $this->element['fileName'];
 		}
 
 		return $return;
@@ -120,8 +120,25 @@ class JFormFieldJtfileupload extends JFormFieldFile
 
 		if ($this->fileExist)
 		{
-			$renderedInput .= $this->fileName;
+			$id = 'jform_com_fields_' . $this->fieldname . '_choverride';
+
+			$prepend = '<p>'
+				. '<b>' . JText::_('JTFILEUPLOAD_UPLOADED_FILE') . ':</b> '
+				. $this->fileName
+				. '</p>'
+				. '<p>'
+				. '<div class="control-label" style="width: auto;">'
+				. '<label for="' . $id . '">' . JText::_('JTFILEUPLOAD_OVERRIDE_FILE') . ': </label>'
+				. '</div>'
+				. '<input type="checkbox" id="' . $id . '" name="jform[com_fields][' . $this->fieldname . '_choverride]" value="override"/>'
+				. '</p>';
+
+			$renderedInput = $prepend . $renderedInput;
 		}
+
+		//echo 'render <p>';
+		//print_r($renderedInput);
+		//echo 'render <p>';
 
 		return $renderedInput;
 	}
