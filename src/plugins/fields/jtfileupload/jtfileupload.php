@@ -59,9 +59,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * Transforms the field into a DOM XML element and appends it as a child on the given parent.
 	 *
-	 * @param   stdClass   $field  The field.
-	 * @param   DOMElement $parent The field node parent.
-	 * @param   JForm      $form   The form.
+	 * @param stdClass   $field  The field.
+	 * @param DOMElement $parent The field node parent.
+	 * @param JForm      $form   The form.
 	 *
 	 * @return   DOMElement
 	 *
@@ -132,10 +132,10 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * The save event.
 	 *
-	 * @param   string  $context The context
-	 * @param   JTable  $item    The table
-	 * @param   boolean $isNew   Is new item
-	 * @param   array   $data    The validated data
+	 * @param string  $context The context
+	 * @param JTable  $item    The table
+	 * @param boolean $isNew   Is new item
+	 * @param array   $data    The validated data
 	 *
 	 * @return   boolean
 	 *
@@ -154,14 +154,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			{
 				if (file_exists($filePath))
 					return;
-
-//				if (substr($savePath, -1) != "/")
-//					$savePath .= "/";
-//				if (substr($savePath, 0, 1) == "/")
-//					$savePath = substr($savePath, 1);
-
-				//$bufferPath = str_replace("/", "\/", $savePath);
-				//$buffer     = "RewriteRule ^" . $bufferPath . ".*$ readmedia.php [L]";
 
 				$uriInstance = JUri::getInstance();
 				$buffer      = "RewriteCond %{HTTP_REFERER} !^" . $uriInstance->getScheme() . "://" . $uriInstance->getHost() . ".*$ [NC]\r\n
@@ -252,7 +244,10 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			}
 
 			$mediaHelper = new JHelperMedia;
-			if (!$mediaHelper->canUpload($file, 'com_fields')) { return false; }
+			if (!$mediaHelper->canUpload($file, 'com_fields'))
+			{
+				return false;
+			}
 
 			if (File::upload($src, $destination))
 			{
@@ -274,10 +269,10 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 	/**
 	 * The save event.
 	 *
-	 * @param   string  $context The context
-	 * @param   JTable  $item    The table
-	 * @param   boolean $isNew   Is new item
-	 * @param   array   $data    The validated data
+	 * @param string  $context The context
+	 * @param JTable  $item    The table
+	 * @param boolean $isNew   Is new item
+	 * @param array   $data    The validated data
 	 *
 	 * @return  boolean
 	 *
