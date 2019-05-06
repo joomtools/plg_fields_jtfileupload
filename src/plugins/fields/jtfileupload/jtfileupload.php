@@ -118,9 +118,13 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		{
 			//echo "Field value " ;print_r($field->value);
 
+			//Stuff for the layout
 			$fieldNode->setAttribute('fileExist', true);
 			$fieldNode->setAttribute('fileName', $field->value);
 			//echo '<h1>Field Node</h1>';var_dump($fieldNode->getAttribute('fileName'));
+
+			//Info for saving process later
+			$this->fieldDatas[$field->name]["existingFileName"] = $field->value;
 
 			$script = "document.getElementById(\"jform_com_fields_" . strtolower($field->name) . "\")";
 			Factory::getDocument()->addScriptDeclaration($script);
@@ -181,16 +185,38 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 
 		//Get the uploaded files object
 		$allFiles = new JtFileUpload\Input\Files;
-		$files  = $allFiles->get("jform");
+		$files    = $allFiles->get("jform");
 
 		foreach ($this->fieldDatas as $fieldData)
 		{
 			if ($fieldData["uploaded"]) continue;
 
+			$postData = JFactory::getApplication()->input->post;
+
+			$choveride_res = $postData->getArray(array(
+				'jform' => array(
+					'com_fields' => array(
+						$fieldData["fieldName"] . '_choverride' => 'string'
+					)
+				)
+			));
+
+			$choverride = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_choverride'];
+
+			if (!is_null($choverride))
+			{
+				// The name of the file, which where uploaded last time article was saved
+				$existingFileName = $fieldData['existingFileName'];
+
+				//TODO delete old file and upload new file
+				//TODO else return and keep the existing file
+			}
+
 			//Get the file object for the form
 			$file = $files['com_fields'][$fieldData["fieldName"]];
 
 			//No file was uploaded
+			//TODO No file was uploaded, is required, but a file exist because it was uploaded last time the article was saved --> do nothing all is good
 			if ((int) $file['error'] === 4 && !$fieldData["required"])
 			{
 				return true;
@@ -199,6 +225,8 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			{
 				return false;
 			}
+
+			//TODO file was uploaded, but there is already an existing file. Do we have a trigger from the form to override the exting file?
 
 			//Make the filename safe for the Web
 			$filename = File::makeSafe($file['name']);
