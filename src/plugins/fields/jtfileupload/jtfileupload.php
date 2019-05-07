@@ -145,6 +145,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 *
 	 * @return   boolean
 	 *
+	 * @throws Exception
 	 * @since   3.7.0
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
@@ -212,14 +213,13 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			if (!is_null($choverride))
 			{
 				$overrideExistingFile = true;
-
-				//TODO else return and keep the existing file
 			}
 			// If a file is already uploaded and we don't want to override it, we just keep the existing values
 			else if (!empty($existingFileName))
 			{
 				$this->fieldDatas[$fieldData["fieldName"]]["uploaded"]     = true;
 				$this->fieldDatas[$fieldData["fieldName"]]["fileNameSafe"] = $existingFileName;
+
 				return true;
 			}
 
@@ -227,7 +227,6 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			$file = $files['com_fields'][$fieldData["fieldName"]];
 
 			//No file was uploaded
-			//TODO No file was uploaded, is required, but a file exist because it was uploaded last time the article was saved --> do nothing all is good
 			if ((int) $file['error'] === 4 && !$fieldData["required"])
 			{
 				return true;
@@ -236,8 +235,6 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			{
 				return false;
 			}
-
-			//TODO file was uploaded, but there is already an existing file. Do we have a trigger from the form to override the exting file?
 
 			//Make the filename safe for the Web
 			$filename = File::makeSafe($file['name']);
@@ -272,7 +269,6 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			$destinationPath = JPATH_SITE . "/" . $fieldData["savePath"];
 			$destination     = $destinationPath . "/" . $filename;
 
-			//TODO Add postfix or raise warning that file exists
 			//Add a postfix if file already exist
 			while (file_exists($destination))
 			{
