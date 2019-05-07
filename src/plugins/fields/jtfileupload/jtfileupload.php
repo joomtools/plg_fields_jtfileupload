@@ -99,7 +99,14 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 
 		// Add enctype to formtag
-		$script = "jQuery(document).ready(function($){ 
+		$script = "function jtfileuploadReady(fn) {
+                if (document.attachEvent ? document.readyState === \"complete\" : document.readyState !== \"loading\"){
+                    fn();
+                } else {
+                    document.addEventListener('DOMContentLoaded', fn);
+                }
+			};
+		jQuery(document).ready(function($){ 
 	                    $('form[name=\"adminForm\"]').attr('enctype','multipart/form-data');
 	               });";
 
@@ -118,7 +125,15 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		//Edit? File already exist?
 		if (!empty($field->value))
 		{
-			//echo "Field value " ;print_r($field->value);
+			$hideField = "
+			function hideField() {
+				var matches = document.querySelectorAll('#jform_com_fields_" . $field->name . "');
+				matches.forEach(function(field){ field.setAttribute('disabled','disabled');
+			})};
+			jtfileuploadReady(hideField);
+			";
+
+			Factory::getDocument()->addScriptDeclaration($hideField);
 
 			//Stuff for the layout
 			$fieldNode->setAttribute('fileExist', true);
@@ -127,9 +142,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 			//Info for saving process later
 			$this->fieldDatas[$field->name]["existingFileName"] = $field->value;
-
-			$script = "document.getElementById(\"jform_com_fields_" . strtolower($field->name) . "\")";
-			Factory::getDocument()->addScriptDeclaration($script);
 		}
 
 		return $fieldNode;
