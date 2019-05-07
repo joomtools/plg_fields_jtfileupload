@@ -231,7 +231,8 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			{
 				return true;
 			}
-			else if ((int) $file['error'] === 4 && $fieldData["required"])
+			else if (((int) $file['error'] === 4 && $fieldData["required"])
+				|| ((int) $file['error'] === 4 && $overrideExistingFile))
 			{
 				return false;
 			}
