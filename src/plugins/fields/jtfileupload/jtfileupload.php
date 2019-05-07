@@ -113,6 +113,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		$fieldNode->setAttribute('accept', '.pdf,.PDF');
 
 
+		$this->fieldDatas[$field->name]["existingFileName"] = "";
+
 		//Edit? File already exist?
 		if (!empty($field->value))
 		{
@@ -203,13 +205,22 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 
 			$choverride = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_choverride'];
 
+			$existingFileName = $fieldData['existingFileName'];
+
 			if (!is_null($choverride))
 			{
 				// The name of the file, which where uploaded last time article was saved
-				$existingFileName = $fieldData['existingFileName'];
+
 
 				//TODO delete old file and upload new file
 				//TODO else return and keep the existing file
+			}
+			// If a file is already uploaded and we don't want to override it, we just keep the existing values
+			else if (!empty($existingFileName))
+			{
+				$this->fieldDatas[$fieldData["fieldName"]]["uploaded"]     = true;
+				$this->fieldDatas[$fieldData["fieldName"]]["fileNameSafe"] = $existingFileName;
+				return true;
 			}
 
 			//Get the file object for the form
