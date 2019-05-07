@@ -205,14 +205,14 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 
 			$choverride = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_choverride'];
 
+			// The name of the file, which where uploaded last time article was saved
 			$existingFileName = $fieldData['existingFileName'];
 
+			$overrideExistingFile = false;
 			if (!is_null($choverride))
 			{
-				// The name of the file, which where uploaded last time article was saved
+				$overrideExistingFile = true;
 
-
-				//TODO delete old file and upload new file
 				//TODO else return and keep the existing file
 			}
 			// If a file is already uploaded and we don't want to override it, we just keep the existing values
@@ -300,9 +300,21 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 
 				return false;
 			}
+			if ($overrideExistingFile)
+			{
+				//delete old file and upload new file
+				$this->deleteFile($destinationPath, $existingFileName);
+			}
+
 		}
 
 		return true;
+	}
+
+	private function deleteFile($folder, $fileName)
+	{
+		if (!File::delete($folder . "/" . $fileName))
+			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
 	}
 
 	/**
