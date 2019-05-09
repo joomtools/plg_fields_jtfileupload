@@ -59,9 +59,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * Transforms the field into a DOM XML element and appends it as a child on the given parent.
 	 *
-	 * @param   stdClass   $field  The field.
-	 * @param   DOMElement $parent The field node parent.
-	 * @param   JForm      $form   The form.
+	 * @param stdClass   $field  The field.
+	 * @param DOMElement $parent The field node parent.
+	 * @param JForm      $form   The form.
 	 *
 	 * @return   DOMElement
 	 *
@@ -70,6 +70,15 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	public function onCustomFieldsPrepareDom($field, DOMElement $parent, JForm $form)
 	{
 		$fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
+
+		$params = JComponentHelper::getParams('com_fields');
+
+		$params->set('upload_maxsize', 10);
+		$params->set('upload_extensions', 'pdf,PDF');
+		//$params->Set('ignore_extensions', ???);
+		$params->set('restrict_uploads', 1);
+		$params->set('upload_mime', 'application/pdf');
+		//$params->set('image_extensions', ???);
 
 		// Execute only if we had a jtfileupload
 		if ($field->type != 'jtfileupload')
@@ -90,9 +99,19 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 
 		// Add enctype to formtag
-		$script = "jQuery(document).ready(function($){ 
-	                    $('form[name=\"adminForm\"]').attr('enctype','multipart/form-data');
-	               });";
+		$script = "function jtfileuploadReady(fn) {
+                if (document.attachEvent ? document.readyState === \"complete\" : document.readyState !== \"loading\"){
+                    fn();
+                } else {
+                    document.addEventListener('DOMContentLoaded', fn);
+                }
+			};
+			
+			function jtFileUploadEnctype(){
+				document.querySelectorAll('form[name=\"adminForm\"]')[0].setAttribute('enctype','multipart/form-data');
+			};
+			jtfileuploadReady(jtFileUploadEnctype);
+		";
 
 		Factory::getDocument()->addScriptDeclaration($script);
 
@@ -103,19 +122,62 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		$fieldNode->setAttribute('accept', '.pdf,.PDF');
 
+
+		$this->fieldDatas[$field->name]["existingFileName"] = "";
+
+		//Edit? File already exist?
+		if (!empty($field->value))
+		{
+			$hideField = "
+			function hideField() {
+				var uploadField = document.getElementById('jform_com_fields_" . $field->name . "');
+				uploadField.disabled = true;
+				
+				var checkBox = document.getElementById('jform_com_fields_" . $field->name . "_choverride');
+				
+				checkBox.addEventListener('click', _ => {hideShowUpload();});
+			};
+			jtfileuploadReady(hideField);
+			
+			function hideShowUpload(){
+				var uploadField = document.getElementById('jform_com_fields_" . $field->name . "');
+				var checkBox = document.getElementById('jform_com_fields_" . $field->name . "_choverride');
+				
+				if (checkBox.checked == true){
+				console.log('Click');
+					uploadField.disabled = false;
+				} else {
+					uploadField.disabled = true;
+				}
+				
+			};
+			";
+
+			Factory::getDocument()->addScriptDeclaration($hideField);
+
+			//Stuff for the layout
+			$fieldNode->setAttribute('fileExist', true);
+			$fieldNode->setAttribute('fileName', $field->value);
+			//echo '<h1>Field Node</h1>';var_dump($fieldNode->getAttribute('fileName'));
+
+			//Info for saving process later
+			$this->fieldDatas[$field->name]["existingFileName"] = $field->value;
+		}
+
 		return $fieldNode;
 	}
 
 	/**
 	 * The save event.
 	 *
-	 * @param   string  $context The context
-	 * @param   JTable  $item    The table
-	 * @param   boolean $isNew   Is new item
-	 * @param   array   $data    The validated data
+	 * @param string  $context The context
+	 * @param JTable  $item    The table
+	 * @param boolean $isNew   Is new item
+	 * @param array   $data    The validated data
 	 *
 	 * @return   boolean
 	 *
+	 * @throws Exception
 	 * @since   3.7.0
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
@@ -131,14 +193,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			{
 				if (file_exists($filePath))
 					return;
-
-//				if (substr($savePath, -1) != "/")
-//					$savePath .= "/";
-//				if (substr($savePath, 0, 1) == "/")
-//					$savePath = substr($savePath, 1);
-
-				//$bufferPath = str_replace("/", "\/", $savePath);
-				//$buffer     = "RewriteRule ^" . $bufferPath . ".*$ readmedia.php [L]";
 
 				$uriInstance = JUri::getInstance();
 				$buffer      = "RewriteCond %{HTTP_REFERER} !^" . $uriInstance->getScheme() . "://" . $uriInstance->getHost() . ".*$ [NC]\r\n
@@ -165,28 +219,58 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 		}
 
 		//Get the uploaded files object
-		$files = new JtFileUpload\Input\Files;
-		$file  = $files->get("jform");
+		$allFiles = new JtFileUpload\Input\Files;
+		$files    = $allFiles->get("jform");
 
 		foreach ($this->fieldDatas as $fieldData)
 		{
 			if ($fieldData["uploaded"]) continue;
 
+			$postData = JFactory::getApplication()->input->post;
+
+			$choveride_res = $postData->getArray(array(
+				'jform' => array(
+					'com_fields' => array(
+						$fieldData["fieldName"] . '_choverride' => 'string'
+					)
+				)
+			));
+
+			$choverride = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_choverride'];
+
+			// The name of the file, which where uploaded last time article was saved
+			$existingFileName = $fieldData['existingFileName'];
+
+			$overrideExistingFile = false;
+			if (!is_null($choverride))
+			{
+				$overrideExistingFile = true;
+			}
+			// If a file is already uploaded and we don't want to override it, we just keep the existing values
+			else if (!empty($existingFileName))
+			{
+				$this->fieldDatas[$fieldData["fieldName"]]["uploaded"]     = true;
+				$this->fieldDatas[$fieldData["fieldName"]]["fileNameSafe"] = $existingFileName;
+
+				return true;
+			}
+
 			//Get the file object for the form
-			$fileSub = $file['com_fields'][$fieldData["fieldName"]];
+			$file = $files['com_fields'][$fieldData["fieldName"]];
 
 			//No file was uploaded
-			if ((int) $fileSub['error'] === 4 && !$fieldData["required"])
+			if ((int) $file['error'] === 4 && !$fieldData["required"])
 			{
 				return true;
 			}
-			else if ((int) $fileSub['error'] === 4 && $fieldData["required"])
+			else if (((int) $file['error'] === 4 && $fieldData["required"])
+				|| ((int) $file['error'] === 4 && $overrideExistingFile))
 			{
 				return false;
 			}
 
 			//Make the filename safe for the Web
-			$filename = File::makeSafe($fileSub['name']);
+			$filename = File::makeSafe($file['name']);
 			$filename = str_replace(" ", "_", $filename);
 
 			//TODO check error in fileSub
@@ -201,9 +285,20 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 			}
 
 			//TODO check filesize
+			/*
+			 * if (($file['error'] == 1)
+				|| ($uploadMaxSize > 0 && $file['size'] > $uploadMaxSize)
+				|| ($uploadMaxFileSize > 0 && $file['size'] > $uploadMaxFileSize))
+			{
+				// File size exceed either 'upload_max_filesize' or 'upload_maxsize'.
+				JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_WARNFILETOOLARGE'));
+
+				return false;
+			}
+			 */
 
 			//Upload the file
-			$src             = $fileSub['tmp_name'];
+			$src             = $file['tmp_name'];
 			$destinationPath = JPATH_SITE . "/" . $fieldData["savePath"];
 			$destination     = $destinationPath . "/" . $filename;
 
@@ -214,6 +309,12 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 				$filename    = $path_parts['filename'] . "_" . rand() . "." . $path_parts['extension'];
 				$destination = $destinationPath . "/" . $filename;
 				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
+			}
+
+			$mediaHelper = new JHelperMedia;
+			if (!$mediaHelper->canUpload($file, 'com_fields'))
+			{
+				return false;
 			}
 
 			if (File::upload($src, $destination))
@@ -228,18 +329,30 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 
 				return false;
 			}
+			if ($overrideExistingFile)
+			{
+				//delete old file and upload new file
+				$this->deleteFile($destinationPath, $existingFileName);
+			}
+
 		}
 
 		return true;
 	}
 
+	private function deleteFile($folder, $fileName)
+	{
+		if (!File::delete($folder . "/" . $fileName))
+			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
+	}
+
 	/**
 	 * The save event.
 	 *
-	 * @param   string  $context The context
-	 * @param   JTable  $item    The table
-	 * @param   boolean $isNew   Is new item
-	 * @param   array   $data    The validated data
+	 * @param string  $context The context
+	 * @param JTable  $item    The table
+	 * @param boolean $isNew   Is new item
+	 * @param array   $data    The validated data
 	 *
 	 * @return  boolean
 	 *
