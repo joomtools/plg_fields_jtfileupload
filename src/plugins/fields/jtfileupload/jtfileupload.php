@@ -106,9 +106,12 @@ class plgFieldsJtfileupload extends FieldsPlugin
                     document.addEventListener('DOMContentLoaded', fn);
                 }
 			};
-		jQuery(document).ready(function($){ 
-	                    $('form[name=\"adminForm\"]').attr('enctype','multipart/form-data');
-	               });";
+			
+			function jtFileUploadEnctype(){
+				document.querySelectorAll('form[name=\"adminForm\"]')[0].setAttribute('enctype','multipart/form-data');
+			};
+			jtfileuploadReady(jtFileUploadEnctype);
+		";
 
 		Factory::getDocument()->addScriptDeclaration($script);
 
@@ -127,10 +130,27 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		{
 			$hideField = "
 			function hideField() {
-				var matches = document.querySelectorAll('#jform_com_fields_" . $field->name . "');
-				matches.forEach(function(field){ field.setAttribute('disabled','disabled');
-			})};
+				var uploadField = document.getElementById('jform_com_fields_" . $field->name . "');
+				uploadField.disabled = true;
+				
+				var checkBox = document.getElementById('jform_com_fields_" . $field->name . "_choverride');
+				
+				checkBox.addEventListener('click', _ => {hideShowUpload();});
+			};
 			jtfileuploadReady(hideField);
+			
+			function hideShowUpload(){
+				var uploadField = document.getElementById('jform_com_fields_" . $field->name . "');
+				var checkBox = document.getElementById('jform_com_fields_" . $field->name . "_choverride');
+				
+				if (checkBox.checked == true){
+				console.log('Click');
+					uploadField.disabled = false;
+				} else {
+					uploadField.disabled = true;
+				}
+				
+			};
 			";
 
 			Factory::getDocument()->addScriptDeclaration($hideField);
