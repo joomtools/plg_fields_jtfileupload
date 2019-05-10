@@ -25,6 +25,10 @@
 		<folder>language</folder>
 	</files>
 
+	<media folder="media/plg_fields_jtfileupload" destination="plg_fields_jtfileupload">
+		<folder>js</folder>
+	</media>
+
 	<!-- Update servers -->
 	<updateservers>
 		<server type="extension" priority="1" name="PLG_FIELDS_JTFILEUPLOAD">https://raw.githubusercontent.com/JoomTools/plg_fields_jtfileupload/master/update.xml</server>

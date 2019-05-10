@@ -13,6 +13,7 @@ defined('_JEXEC') or die;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory;
 use Joomla\Filesystem\File;
+use Joomla\CMS\Uri\Uri;
 
 JLoader::import('components.com_fields.libraries.fieldsplugin', JPATH_ADMINISTRATOR);
 JLoader::registerNamespace('JtFileUpload', JPATH_PLUGINS . '/fields/jtfileupload/libraries/jtfileupload', false, false, 'psr4');
@@ -98,22 +99,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		$this->fieldDatas[$field->name]["uploaded"] = false;
 
 
-		// Add enctype to formtag
-		$script = "function jtfileuploadReady(fn) {
-                if (document.attachEvent ? document.readyState === \"complete\" : document.readyState !== \"loading\"){
-                    fn();
-                } else {
-                    document.addEventListener('DOMContentLoaded', fn);
-                }
-			};
-			
-			function jtFileUploadEnctype(){
-				document.querySelectorAll('form[name=\"adminForm\"]')[0].setAttribute('enctype','multipart/form-data');
-			};
-			jtfileuploadReady(jtFileUploadEnctype);
-		";
-
-		Factory::getDocument()->addScriptDeclaration($script);
+		// Add enctype to formtag and jtfileuploadReady method
+		Factory::getDocument()->addScript(Uri::root(true) ."/media/plg_fields_jtfileupload/js/jtfileuploadBasic.js", array(), array('type' => 'text/javascript'));
 
 		if (!$fieldNode)
 		{
