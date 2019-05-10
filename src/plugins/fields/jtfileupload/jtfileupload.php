@@ -135,7 +135,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				
 				var checkBox = document.getElementById('jform_com_fields_" . $field->name . "_choverride');
 				
-				checkBox.addEventListener('click', _ => {hideShowUpload();});
+				checkBox.addEventListener('click', function() {hideShowUpload();});
 			};
 			jtfileuploadReady(hideField);
 			
