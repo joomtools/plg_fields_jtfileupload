@@ -1,9 +1,11 @@
 <?php
 /**
- * Part of the Joomla Framework Input Package
+ * @package      Joomla.Plugin
+ * @subpackage   Fields.JtFileUpload
  *
- * @copyright  Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.
- * @license    GNU General Public License version 2 or later; see LICENSE
+ * @author       Sven Schultschik
+ * @copyright    (c) 2019 JoomTools.de - All rights reserved
+ * @license      GNU General Public License version 3 or later
  */
 
 namespace JtFileUpload\Input;
@@ -23,7 +25,7 @@ class Files extends Input
 	 * The pivoted data from a $_FILES or compatible array.
 	 *
 	 * @var    array
-	 * @since  1.0
+	 * @since  __DEPLOY_VERSION__
 	 */
 	protected $decodedData = array();
 
@@ -34,7 +36,7 @@ class Files extends Input
 	 * @param   array  $options  An optional array of configuration options:
 	 *                           filter : a custom JFilterInput object.
 	 *
-	 * @since   1.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function __construct(array $source = null, array $options = array())
 	{
@@ -64,7 +66,7 @@ class Files extends Input
 	 * @return  mixed  The filtered input value.
 	 *
 	 * @see     \Joomla\Filter\InputFilter::clean()
-	 * @since   1.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function get($name, $default = null, $filter = 'cmd')
 	{
@@ -93,7 +95,7 @@ class Files extends Input
 	 *
 	 * @return  array
 	 *
-	 * @since   1.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	protected function decodeData(array $data)
 	{
@@ -125,7 +127,7 @@ class Files extends Input
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function set($name, $value)
 	{

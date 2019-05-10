@@ -1,11 +1,11 @@
 <?php
 /**
- * @package          Joomla.Plugin
- * @subpackage       Fields.JtFileUpload
+ * @package      Joomla.Plugin
+ * @subpackage   Fields.JtFileUpload
  *
- * @author           Sven Schultschik
- * @copyright    (c) 2018 JoomTools.de - All rights reserved
- * @license          GNU General Public License version 3 or later
+ * @author       Sven Schultschik
+ * @copyright    (c) 2019 JoomTools.de - All rights reserved
+ * @license      GNU General Public License version 3 or later
  */
 
 defined('_JEXEC') or die;
@@ -18,7 +18,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 	 * Are we in edit mode and a file was already uploaded?
 	 *
 	 * @var bool
-	 * @since 1.0
+	 * @since __DEPLOY_VERSION__
 	 */
 	protected $fileExist = false;
 
@@ -26,7 +26,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 	 * The file name of the previous uploaded file
 	 *
 	 * @var string
-	 * @since 1.0
+	 * @since __DEPLOY_VERSION__
 	 */
 	protected $fileName = '';
 
@@ -37,7 +37,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 	 *
 	 * @return  mixed  The property value or null.
 	 *
-	 * @since   1.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function __get($name)
 	{
@@ -62,7 +62,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function __set($name, $value)
 	{
@@ -92,7 +92,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 	 * @return  boolean  True on success.
 	 *
 	 * @see     JFormField::setup()
-	 * @since   1.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function setup(SimpleXMLElement $element, $value, $group = null)
 	{
@@ -112,7 +112,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 	 *
 	 * @return string The field input markup.
 	 *
-	 * @since 1.0
+	 * @since __DEPLOY_VERSION__
 	 */
 	protected function getInput()
 	{

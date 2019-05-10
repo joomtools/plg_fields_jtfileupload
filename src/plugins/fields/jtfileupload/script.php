@@ -4,7 +4,7 @@
  * @subpackage   Fields.JtFileUpload
  *
  * @author       Sven Schultschik
- * @copyright    (c) 2018 JoomTools.de - All rights reserved
+ * @copyright    (c) 2019 JoomTools.de - All rights reserved
  * @license      GNU General Public License version 3 or later
  */
 

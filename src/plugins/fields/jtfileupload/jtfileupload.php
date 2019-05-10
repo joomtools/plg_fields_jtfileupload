@@ -1,11 +1,11 @@
 <?php
 /**
- * @package          Joomla.Plugin
- * @subpackage       Fields.JtFileUpload
+ * @package      Joomla.Plugin
+ * @subpackage   Fields.JtFileUpload
  *
- * @author           Sven Schultschik
- * @copyright    (c) 2018 JoomTools.de - All rights reserved
- * @license          GNU General Public License version 3 or later
+ * @author       Sven Schultschik
+ * @copyright    (c) 2019 JoomTools.de - All rights reserved
+ * @license      GNU General Public License version 3 or later
  */
 
 defined('_JEXEC') or die;
@@ -178,7 +178,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 * @return   boolean
 	 *
 	 * @throws Exception
-	 * @since   3.7.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
@@ -356,7 +356,7 @@ RewriteRule ^.*$ - [NC,R=403,L]";
 	 *
 	 * @return  boolean
 	 *
-	 * @since   3.7.0
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public function onContentAfterSave($context, $item, $isNew, $data = array())
 	{
