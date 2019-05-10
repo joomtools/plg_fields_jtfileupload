@@ -122,7 +122,7 @@ class JFormFieldJtfileupload extends JFormFieldFile
 		{
 			$id = 'jform_com_fields_' . $this->fieldname . '_choverride';
 
-			$prepend = '<p>'
+			$html = '<div class="jtfileupload"><p>'
 				. '<b>' . JText::_('JTFILEUPLOAD_UPLOADED_FILE') . ':</b> '
 				. $this->fileName
 				. '</p>'
@@ -131,9 +131,11 @@ class JFormFieldJtfileupload extends JFormFieldFile
 				. '<label for="' . $id . '">' . JText::_('JTFILEUPLOAD_OVERRIDE_FILE') . ': </label>'
 				. '</div>'
 				. '<input type="checkbox" id="' . $id . '" name="jform[com_fields][' . $this->fieldname . '_choverride]" value="override"/>'
-				. '</p>';
+				. '</p>'
+				. $renderedInput
+				. '</div>';
 
-			$renderedInput = $prepend . $renderedInput;
+			$renderedInput = $html;
 		}
 
 		//echo 'render <p>';

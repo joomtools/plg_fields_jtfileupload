@@ -100,7 +100,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 
 		// Add enctype to formtag and jtfileuploadReady method
-		Factory::getDocument()->addScript(Uri::root(true) ."/media/plg_fields_jtfileupload/js/jtfileuploadBasic.js", array(), array('type' => 'text/javascript'));
+		Factory::getDocument()->addScript(Uri::root(true) . "/media/plg_fields_jtfileupload/js/jtfileuploadBasic.js", array(), array('type' => 'text/javascript'));
 
 		if (!$fieldNode)
 		{
@@ -115,38 +115,12 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		//Edit? File already exist?
 		if (!empty($field->value))
 		{
-			$hideField = "
-			function hideField() {
-				var uploadField = document.getElementById('jform_com_fields_" . $field->name . "');
-				uploadField.disabled = true;
-				
-				var checkBox = document.getElementById('jform_com_fields_" . $field->name . "_choverride');
-				
-				checkBox.addEventListener('click', function() {hideShowUpload();});
-			};
-			jtfileuploadReady(hideField);
-			
-			function hideShowUpload(){
-				var uploadField = document.getElementById('jform_com_fields_" . $field->name . "');
-				var checkBox = document.getElementById('jform_com_fields_" . $field->name . "_choverride');
-				
-				if (checkBox.checked == true){
-				console.log('Click');
-					uploadField.disabled = false;
-				} else {
-					uploadField.disabled = true;
-				}
-				
-			};
-			";
-
-			Factory::getDocument()->addScriptDeclaration($hideField);
+			Factory::getDocument()->addScript(Uri::root(true) . "/media/plg_fields_jtfileupload/js/jtfileuploadEdit.js", array(), array('type' => 'text/javascript'));
 
 			//Stuff for the layout
 			$fieldNode->setAttribute('fileExist', true);
 			$fieldNode->setAttribute('fileName', $field->value);
-			//echo '<h1>Field Node</h1>';var_dump($fieldNode->getAttribute('fileName'));
-
+			
 			//Info for saving process later
 			$this->fieldDatas[$field->name]["existingFileName"] = $field->value;
 		}
