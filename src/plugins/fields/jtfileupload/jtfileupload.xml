@@ -22,6 +22,10 @@
 	<!-- Plugin files -->
 	<files>
 		<filename plugin="jtfileupload">jtfileupload.php</filename>
+		<folder>fields</folder>
+		<folder>libraries</folder>
+		<folder>params</folder>
+		<folder>tmpl</folder>
 		<folder>language</folder>
 	</files>
 
