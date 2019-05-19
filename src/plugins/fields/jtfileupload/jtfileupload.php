@@ -10,10 +10,8 @@
 
 defined('_JEXEC') or die;
 
-use Joomla\CMS\Application\CMSApplication;
-use Joomla\CMS\Factory;
-use Joomla\CMS\Uri\Uri;
 use Joomla\Filesystem\File;
+use Joomla\CMS\HTML\HTMLHelper;
 
 JLoader::import('components.com_fields.libraries.fieldsplugin', JPATH_ADMINISTRATOR);
 JLoader::registerNamespace('JtFileUpload', JPATH_PLUGINS . '/fields/jtfileupload/libraries/jtfileupload', false, false, 'psr4');
@@ -36,7 +34,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * Application object
 	 *
-	 * @var     CMSApplication
+	 * @var     JApplication
 	 * @since   __DEPLOY_VERSION__
 	 */
 	protected $app;
@@ -52,7 +50,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
 	 *
-	 * @var     boolean
+	 * @var     JLanguage
 	 * @since   __DEPLOY_VERSION__
 	 */
 	protected $autoloadLanguage = true;
@@ -99,7 +97,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		$this->fieldDatas[$field->name]["uploaded"] = false;
 
 		// Add enctype to formtag and jtfileuploadReady method
-		Factory::getDocument()->addScript(Uri::root(true) . "/media/plg_fields_jtfileupload/js/jtfileuploadBasic.js", array(), array('type' => 'text/javascript'));
+		HTMLHelper::_('script', 'plg_fields_jtfileupload/jtfileuploadBasic.min.js', array('version' => 'auto', 'relative' => true));
 
 		if (!$fieldNode)
 		{
@@ -113,7 +111,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 		// Edit? File already exist?
 		if (!empty($field->value))
 		{
-			Factory::getDocument()->addScript(Uri::root(true) . "/media/plg_fields_jtfileupload/js/jtfileuploadEdit.js", array(), array('type' => 'text/javascript'));
+			HTMLHelper::_('script', 'plg_fields_jtfileupload/jtfileuploadEdit.min.js', array('version' => 'auto', 'relative' => true));
 
 			// Stuff for the layout
 			$fieldNode->setAttribute('fileExist', true);
@@ -206,9 +204,12 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 		foreach ($this->fieldDatas as $fieldData)
 		{
-			if ($fieldData["uploaded"]) continue;
+			if ($fieldData["uploaded"])
+			{
+				continue;
+			}
 
-			$postData = JFactory::getApplication()->input->post;
+			$postData = $this->app->input->post;
 
 			$choveride_res = $postData->getArray(array(
 				'jform' => array(
