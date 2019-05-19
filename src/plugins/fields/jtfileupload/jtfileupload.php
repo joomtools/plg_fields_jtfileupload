@@ -155,12 +155,27 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				if (file_exists($filePath))
 					return;
 
-				$uriInstance = JUri::getInstance();
-				$buffer      = "RewriteCond %{HTTP_REFERER} !^" . $uriInstance->getScheme() . "://" . $uriInstance->getHost() . ".*$ [NC]\r\n
-RewriteRule ^.*$ - [NC,R=403,L]";
+				$buffer = [];
 
-				if (!File::write($filePath, $buffer))
-					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_CREATE_HTACCESS", $filePath, $buffer), JLog::ERROR);
+				// Start RewriteEngine
+				$buffer[] = 'RewriteEngine On';
+				$buffer[] = '';
+
+				// Define scheme
+				$buffer[] = 'RewriteCond %{HTTPS} =on';
+				$buffer[] = 'RewriteRule ^ - [env=proto:https]';
+				$buffer[] = 'RewriteCond %{HTTPS} !=on';
+				$buffer[] = 'RewriteRule ^ - [env=proto:http]';
+				$buffer[] = '';
+
+				// Check referer
+				$buffer[] = 'RewriteCond %{HTTP_REFERER} !^%{ENV:PROTO}://%{HTTP_HOST}.*$ [NC]';
+				$buffer[] = 'RewriteRule ^.*$ - [NC,R=403,L]';
+
+				$htaccess = implode("\r\n", $buffer);
+
+				if (!File::write($filePath, $htaccess))
+					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_CREATE_HTACCESS", $filePath, $htaccess), JLog::ERROR);
 			}
 			else
 			{
