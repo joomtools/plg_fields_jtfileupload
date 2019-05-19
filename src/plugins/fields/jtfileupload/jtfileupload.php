@@ -146,13 +146,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 			$filePath = JPATH_SITE . "/" . $savePath . "/.htaccess";
 
-			if ($downloadProtection == 1)
+			if ($downloadProtection == 1 && !file_exists($filePath))
 			{
-				if (file_exists($filePath))
-				{
-					return true;
-				}
-
 				$buffer = [];
 
 				// Start RewriteEngine
@@ -175,14 +170,12 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				if (!File::write($filePath, $htaccess))
 					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_CREATE_HTACCESS", $filePath, $htaccess), JLog::ERROR);
 			}
-			else
+
+			if ($downloadProtection == 0 && file_exists($filePath))
 			{
-				if (file_exists($filePath))
+				if (!File::delete($filePath))
 				{
-					if (!File::delete($filePath))
-					{
-						$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_DELETE_HTACCESS", $filePath), JLog::ERROR);
-					}
+					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_DELETE_HTACCESS", $filePath), JLog::ERROR);
 				}
 			}
 		}
