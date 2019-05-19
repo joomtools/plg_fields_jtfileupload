@@ -1,27 +1,26 @@
 function hideField() {
-    var fieldsContainers = document.querySelectorAll('.jtfileupload');
+	var fieldsContainers = document.querySelectorAll('.jtfileupload');
 
-    fieldsContainers.forEach(function (el, i) {
-        var uploadField = el.querySelector('input[type=file]');
+	fieldsContainers.forEach(function (el, i) {
+		var uploadField = el.querySelector('input[type=file]'),
+			uploadFieldId = uploadField.id,
+			checkBox = document.getElementById(uploadFieldId + '_choverride');
 
-        uploadField.disabled = true;
+		uploadField.disabled = true;
 
-        var uploadFieldId = uploadField.id;
-
-        var checkBox = document.getElementById(uploadFieldId + '_choverride');
-
-        checkBox.addEventListener('click', function () {
-            hideShowUpload(uploadField, checkBox);
-        });
-    });
-};
+		checkBox.addEventListener('click', function () {
+			hideShowUpload(uploadField, checkBox);
+		});
+	});
+}
 jtfileuploadReady(hideField);
 
 function hideShowUpload(uploadField, checkBox) {
-    if (checkBox.checked == true) {
-        uploadField.disabled = false;
-    } else {
-        uploadField.disabled = true;
-    }
+	if (checkBox.checked == true) {
+		uploadField.disabled = false;
 
-};
+		return;
+	}
+
+	uploadField.disabled = true;
+}
