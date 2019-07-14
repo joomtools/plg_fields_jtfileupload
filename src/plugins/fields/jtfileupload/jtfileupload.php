@@ -292,7 +292,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
 			}
 
-			$mediaHelper = new JHelperMedia;
+			#$mediaHelper = new JHelperMedia;
+			
+			$mediaHelper = new JtMediaHelper;
 
 			if (!$mediaHelper->canUpload($file, 'com_fields'))
 			{
