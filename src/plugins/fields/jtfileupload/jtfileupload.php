@@ -116,9 +116,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			// Stuff for the layout
 			$fieldNode->setAttribute('fileExist', true);
 			$fieldNode->setAttribute('fileName', $field->value);
-
-			// Info for saving process later
-			$this->fieldDatas[$field->name]["existingFileName"] = $field->value;
 		}
 
 		return $fieldNode;
@@ -208,6 +205,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				'jform' => array(
 					'com_fields' => array(
 						$fieldData["fieldName"] . '_choverride' => 'string',
+						$fieldData["fieldName"] . '_existingFileName' => 'string',
 					),
 				),
 			));
@@ -215,7 +213,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			$choverride = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_choverride'];
 
 			// The name of the file, which where uploaded last time article was saved
-			$existingFileName = $fieldData['existingFileName'];
+			$existingFileName = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_existingFileName'];
 
 			if (is_null($choverride) && !empty($existingFileName))
 			{
@@ -248,6 +246,18 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				return false;
 			}
 
+			if (empty($file['name'])) {
+				$this->app->enqueueMessage(\JText::_('JLIB_MEDIA_ERROR_UPLOAD_INPUT'), 'error');
+
+				return false;
+			}
+
+			if (str_replace(' ', '', $file['name']) !== $file['name'] || $file['name'] !== \JFile::makeSafe($file['name'])) {
+				$this->app->enqueueMessage(\JText::_('JLIB_MEDIA_ERROR_WARNFILENAME'), 'error');
+
+				return false;
+			}
+
 			// Make the filename safe for the Web
 			$filename = File::makeSafe($file['name']);
 			$filename = str_replace(" ", "_", $filename);
@@ -264,6 +274,8 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				return false;
 			}
 
+			// TODO check mime type
+
 			// TODO check filesize
 			/*
 			 * if (($file['error'] == 1)
@@ -272,6 +284,15 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			{
 				// File size exceed either 'upload_max_filesize' or 'upload_maxsize'.
 				JError::raiseWarning(100, JText::_('COM_MEDIA_ERROR_WARNFILETOOLARGE'));
+
+				return false;
+			}
+			copy of MedaiManager::canUpload
+			$maxSize = (int) ($params->get('upload_maxsize', 0) * 1024 * 1024);
+
+			if ($maxSize > 0 && (int) $file['size'] > $maxSize)
+			{
+				$app->enqueueMessage(\JText::_('JLIB_MEDIA_ERROR_WARNFILETOOLARGE'), 'error');
 
 				return false;
 			}
@@ -290,13 +311,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				$destination = $destinationPath . "/" . $filename;
 
 				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_FILE_ALREADY_EXISTS", $filename), 'warning');
-			}
-
-			$mediaHelper = new JHelperMedia;
-
-			if (!$mediaHelper->canUpload($file, 'com_fields'))
-			{
-				return false;
 			}
 
 			if (!File::upload($src, $destination))
@@ -322,8 +336,15 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 	private function deleteFile($folder, $fileName)
 	{
-		if (!File::delete($folder . "/" . $fileName))
-		{
+		if (empty($fileName)){
+			$this->app->enqueueMessage("JTFILEUPLOAD_DELETE_FILE_FAILED_NOFILENAME", 'error');
+		}
+		try{
+			if (!File::delete($folder . "/" . $fileName))
+			{
+				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
+			}
+		} catch(Exception $ex){
 			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
 		}
 	}
