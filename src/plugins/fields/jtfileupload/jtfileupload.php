@@ -116,9 +116,6 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			// Stuff for the layout
 			$fieldNode->setAttribute('fileExist', true);
 			$fieldNode->setAttribute('fileName', $field->value);
-
-			// Info for saving process later
-			$this->fieldDatas[$field->name]["existingFileName"] = $field->value;
 		}
 
 		return $fieldNode;
@@ -208,6 +205,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				'jform' => array(
 					'com_fields' => array(
 						$fieldData["fieldName"] . '_choverride' => 'string',
+						$fieldData["fieldName"] . '_existingFileName' => 'string',
 					),
 				),
 			));
@@ -215,7 +213,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			$choverride = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_choverride'];
 
 			// The name of the file, which where uploaded last time article was saved
-			$existingFileName = $fieldData['existingFileName'];
+			$existingFileName = $choveride_res['jform']['com_fields'][$fieldData["fieldName"] . '_existingFileName'];
 
 			if (is_null($choverride) && !empty($existingFileName))
 			{
@@ -338,8 +336,15 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 	private function deleteFile($folder, $fileName)
 	{
-		if (!File::delete($folder . "/" . $fileName))
-		{
+		if (empty($fileName)){
+			$this->app->enqueueMessage("JTFILEUPLOAD_DELETE_FILE_FAILED_NOFILENAME", 'error');
+		}
+		try{
+			if (!File::delete($folder . "/" . $fileName))
+			{
+				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
+			}
+		} catch(Exception $ex){
 			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
 		}
 	}
