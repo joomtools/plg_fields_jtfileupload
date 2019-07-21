@@ -151,8 +151,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				$buffer[] = 'RewriteEngine On';
 				$buffer[] = '';
 
+				$uriInstance = JUri::getInstance();
 				// Define scheme
-				$buffer[] = 'RewriteCond %{HTTP_REFERER} !^(http://|https://)(www.)?(%{HTTP_HOST}).*$ [NC]';
+				$buffer[] = 'RewriteCond %{HTTP_REFERER} !^(http://|https://)(www.)?(' . $uriInstance->getHost() . ').*$ [NC]';
 				$buffer[] = '';
 				$buffer[] = 'RewriteRule ^.*$ - [NC,R=403,L]';
 
