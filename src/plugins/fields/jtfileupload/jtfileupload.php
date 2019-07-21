@@ -146,20 +146,14 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			if ($downloadProtection == 1 && !file_exists($filePath))
 			{
 				$buffer = [];
-
+				
 				// Start RewriteEngine
 				$buffer[] = 'RewriteEngine On';
 				$buffer[] = '';
 
 				// Define scheme
-				$buffer[] = 'RewriteCond %{HTTPS} =on';
-				$buffer[] = 'RewriteRule ^ - [env=proto:https]';
-				$buffer[] = 'RewriteCond %{HTTPS} !=on';
-				$buffer[] = 'RewriteRule ^ - [env=proto:http]';
+				$buffer[] = 'RewriteCond %{HTTP_REFERER} !^(http://|https://)(www.)?(%{HTTP_HOST}).*$ [NC]';
 				$buffer[] = '';
-
-				// Check referer
-				$buffer[] = 'RewriteCond %{HTTP_REFERER} !^%{ENV:PROTO}://%{HTTP_HOST}.*$ [NC]';
 				$buffer[] = 'RewriteRule ^.*$ - [NC,R=403,L]';
 
 				$htaccess = implode("\r\n", $buffer);
