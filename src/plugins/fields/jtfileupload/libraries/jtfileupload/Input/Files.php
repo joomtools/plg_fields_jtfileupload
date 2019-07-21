@@ -10,6 +10,8 @@
 
 namespace JtFileUpload\Input;
 
+defined('_JEXEC') or die;
+
 use Joomla\Input\Input;
 use Joomla\Filter;
 use Joomla\Utilities\ArrayHelper;
