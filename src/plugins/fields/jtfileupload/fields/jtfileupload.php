@@ -126,13 +126,15 @@ class JFormFieldJtfileupload extends JFormFieldFile
 				. '<b>' . JText::_('JTFILEUPLOAD_UPLOADED_FILE') . ':</b> '
 				. $this->fileName
 				. '</p>'
-				. '<p>'
 				. '<div class="control-label" style="width: auto;">'
+				. '<p>'
 				. '<label for="' . $id . '">' . JText::_('JTFILEUPLOAD_OVERRIDE_FILE') . ': </label>'
-				. '</div>'
+				
 				. '<input type="checkbox" id="' . $id . '" name="jform[com_fields][' . $this->fieldname . '_choverride]" value="override"/>'
 				. '</p>'
+				. '</div>'
 				. $renderedInput
+				. '<input type="hidden" name="jform[com_fields][' . $this->fieldname . '_existingFileName]" value="' . $this->fileName . '"/>'
 				. '</div>';
 
 			$renderedInput = $html;
