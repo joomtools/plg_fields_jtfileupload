@@ -1,11 +1,11 @@
 <?php
 /**
- * @package      Joomla.Plugin
- * @subpackage   Fields.JtFileUpload
+ * @package          Joomla.Plugin
+ * @subpackage       Fields.JtFileUpload
  *
- * @author       Sven Schultschik
+ * @author           Sven Schultschik
  * @copyright    (c) 2019 JoomTools.de - All rights reserved
- * @license      GNU General Public License version 3 or later
+ * @license          GNU General Public License version 3 or later
  */
 
 defined('_JEXEC') or die;
@@ -58,9 +58,9 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	/**
 	 * Transforms the field into a DOM XML element and appends it as a child on the given parent.
 	 *
-	 * @param   stdClass    $field  The field.
-	 * @param   DOMElement  $parent The field node parent.
-	 * @param   JForm       $form   The form.
+	 * @param   stdClass    $field   The field.
+	 * @param   DOMElement  $parent  The field node parent.
+	 * @param   JForm       $form    The form.
 	 *
 	 * @return   DOMElement
 	 *
@@ -136,38 +136,41 @@ class plgFieldsJtfileupload extends FieldsPlugin
 	 */
 	public function onContentBeforeSave($context, $item, $isNew, $data = array())
 	{
-		if ($context == "com_fields.field")
+		if (strcmp($context, "com_fields.field") == 0 && strcmp("jtfileupload", $data["type"]) == 0)
 		{
 			$savePath           = $data["fieldparams"]["savePath"];
 			$downloadProtection = $data["fieldparams"]["downloadProtection"];
 
-			$filePath = JPATH_SITE . "/" . $savePath . "/.htaccess";
-
-			if ($downloadProtection == 1 && !file_exists($filePath))
+			if (!empty($savePath))
 			{
-				$buffer = [];
-				
-				// Start RewriteEngine
-				$buffer[] = 'RewriteEngine On';
-				$buffer[] = '';
+				$filePath = JPATH_SITE . "/" . $savePath . "/.htaccess";
 
-				$uriInstance = JUri::getInstance();
-				// Define scheme
-				$buffer[] = 'RewriteCond %{HTTP_REFERER} !^(http://|https://)(www.)?(' . $uriInstance->getHost() . ').*$ [NC]';
-				$buffer[] = '';
-				$buffer[] = 'RewriteRule ^.*$ - [NC,R=403,L]';
-
-				$htaccess = implode("\r\n", $buffer);
-
-				if (!File::write($filePath, $htaccess))
-					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_CREATE_HTACCESS", $filePath, $htaccess), JLog::ERROR);
-			}
-
-			if ($downloadProtection == 0 && file_exists($filePath))
-			{
-				if (!File::delete($filePath))
+				if ($downloadProtection == 1 && !file_exists($filePath))
 				{
-					$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_DELETE_HTACCESS", $filePath), JLog::ERROR);
+					$buffer = [];
+
+					// Start RewriteEngine
+					$buffer[] = 'RewriteEngine On';
+					$buffer[] = '';
+
+					$uriInstance = JUri::getInstance();
+					// Define scheme
+					$buffer[] = 'RewriteCond %{HTTP_REFERER} !^(http://|https://)(www.)?(' . $uriInstance->getHost() . ').*$ [NC]';
+					$buffer[] = '';
+					$buffer[] = 'RewriteRule ^.*$ - [NC,R=403,L]';
+
+					$htaccess = implode("\r\n", $buffer);
+
+					if (!File::write($filePath, $htaccess))
+						$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_CREATE_HTACCESS", $filePath, $htaccess), JLog::ERROR);
+				}
+
+				if ($downloadProtection == 0 && file_exists($filePath))
+				{
+					if (!File::delete($filePath))
+					{
+						$this->app->enqueueMessage(sprintf("JTFILEUPLOAD_FAILED_DELETE_HTACCESS", $filePath), JLog::ERROR);
+					}
 				}
 			}
 		}
@@ -199,7 +202,7 @@ class plgFieldsJtfileupload extends FieldsPlugin
 			$choveride_res = $postData->getArray(array(
 				'jform' => array(
 					'com_fields' => array(
-						$fieldData["fieldName"] . '_choverride' => 'string',
+						$fieldData["fieldName"] . '_choverride'       => 'string',
 						$fieldData["fieldName"] . '_existingFileName' => 'string',
 					),
 				),
@@ -241,13 +244,15 @@ class plgFieldsJtfileupload extends FieldsPlugin
 				return false;
 			}
 
-			if (empty($file['name'])) {
+			if (empty($file['name']))
+			{
 				$this->app->enqueueMessage(\JText::_('JLIB_MEDIA_ERROR_UPLOAD_INPUT'), 'error');
 
 				return false;
 			}
 
-			if (str_replace(' ', '', $file['name']) !== $file['name'] || $file['name'] !== \JFile::makeSafe($file['name'])) {
+			if (str_replace(' ', '', $file['name']) !== $file['name'] || $file['name'] !== \JFile::makeSafe($file['name']))
+			{
 				$this->app->enqueueMessage(\JText::_('JLIB_MEDIA_ERROR_WARNFILENAME'), 'error');
 
 				return false;
@@ -331,15 +336,19 @@ class plgFieldsJtfileupload extends FieldsPlugin
 
 	private function deleteFile($folder, $fileName)
 	{
-		if (empty($fileName)){
+		if (empty($fileName))
+		{
 			$this->app->enqueueMessage("JTFILEUPLOAD_DELETE_FILE_FAILED_NOFILENAME", 'error');
 		}
-		try{
+		try
+		{
 			if (!File::delete($folder . "/" . $fileName))
 			{
 				$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
 			}
-		} catch(Exception $ex){
+		}
+		catch (Exception $ex)
+		{
 			$this->app->enqueueMessage(JText::sprintf("JTFILEUPLOAD_DELETE_FILE_FAILED", $fileName), 'error');
 		}
 	}
